@@ -6,12 +6,14 @@ shell, display mounting and I/O differ. The spec is `SPEC.md` here; the shared g
 **Priority: the standalone web demo** in `web-demo/`, to share with partners. It contains:
 - the Relay module;
 - the desktop pyramid;
-- a small test bench: sources, play / stop, volume, master clock.
+- a small test bench: generated sources, play / stop, volume, master clock, and the list of Relay's current effects.
+  No mic or file input, no LFOs or cables (decided 2026-10-23).
 
 It builds to one self-contained HTML file.
 
 **Watch for:**
-- Keys act on release (the prototype acts on press; this is a decided change).
+- Keys act on release (the prototype acts on press; this is a decided change), except Shift + Bypass, which opens the
+  menu on press. The grammar is in `control/keys.js` and checked in `tools/checks/relay-control.test.js`.
 - Dial and fader sweeps must stay click-free. See the click-control rules in `docs/HANDOFF.md` §4.
 - Randomization rules:
   - at least three effects remain;

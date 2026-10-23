@@ -41,9 +41,22 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
    half as often, range rules.
 
 ## Steps
-1. Build setup and tests (worklet, dead zone, Shuffler) against the extracted code.
-2. Extract the DSP and the Relay engine; checks pass.
-3. Extract control and UI; build the Relay page (module, pyramid, bench).
-4. Keys act on release (menu on Bypass down); update the spec and the combinations card.
-5. Click detector, measurements, single-file build, hand to the designer.
+1. ~~Build setup and tests (worklet, dead zone, Shuffler) against the extracted code.~~ Done.
+2. ~~Extract the DSP and the Relay engine; checks pass.~~ Done.
+3. ~~Extract control and UI; build the Relay page (module, pyramid, bench).~~ Done. The pyramid stays below the module,
+   as the spec says.
+4. ~~Keys act on release (menu on Bypass down); update the spec and the combinations card.~~ Done.
+5. ~~Click detector, measurements, single-file build.~~ Done: `devices/relay/web-demo/relay.html`. **Waiting on the
+   designer's listening review.**
 6. Moment and Prism, after the review.
+
+## Notes from building the Relay demo
+- **Worklet loading.** Pages opened straight from disk (`file://`) refuse Blob-URL worklets in Chromium; the demo then
+  loads the same source from a `data:` URL, so it runs on the AudioWorklet either way.
+- **Dead zone and OTT.** The four slots are exactly dry in the dead zone. OTT (default 50%, not following the fader)
+  sits after them, so the whole output is bit-exact only with OTT at 0. Behaviour unchanged from v30; the spec's "exactly
+  dry" wording is open for the designer.
+- **Limiter look-ahead.** 95 samples at 48 kHz (1.98 ms): the buffer delays by its length minus one.
+- **Click levels (click-metric.js, 220 Hz sine).** Hard gain step 156×; Shuffler slice edges with the controls still
+  about 9×; smoothed moves 1–3×; Buffer fader sweeps up to about 9× (its 6 ms chunk crossfades); Spectral thin at very
+  low Keep spikes up to 15× with the controls still (the effect itself).

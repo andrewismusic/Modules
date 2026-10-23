@@ -24,6 +24,10 @@ and Granular have inherent wet delays; others ~0.
 - Dial: moves every continuous setting (and, in Random-range mode, every slider range) toward its own destination.
 - Range rules: endpoints ≥3%; ≥80% of the throw covered; gaps only at the left; Tape stop ends in the top 10%,
   Spectral thin in the top 20%, low/high-pass Filter in the top 10%.
+- Keys act on release. A key pressed while Shift is held, or held when Shift goes down, does its Shift function on
+  release instead of its own; Shift released after a combination does nothing. Shift + Bypass is the exception: the menu
+  opens as Bypass goes down, and the releases that follow do nothing. In the menu and Save / Load, Bypass and Shift act on
+  release; Random 1 and Random 2 do nothing there.
 - Shift+Random 1 = Save, Shift+Random 2 = Load (dial scrolls slots 1–64; Bypass confirms, Shift cancels). Presets store effects, settings, ranges, dial targets and position only. Menu settings are GLOBAL.
 - Menu (Shift+Bypass; dial scrolls, Bypass = enter / edit / confirm, Shift = back / cancel). No fader marker on the
   screen. Clock (Internal tempo / External ÷4…×4),

@@ -15,13 +15,16 @@ export async function loadWorklet(entry, sampleRate = 48000) {
 // Sends messages the way the page does (through the port).
 export const send = (proc, m) => proc.port.onmessage({ data: m });
 
-// Runs `blocks` 128-sample blocks; input(i) returns [l, r] for absolute sample i. Returns {L, R} output arrays.
+// Runs `blocks` 128-sample blocks; input(i) returns [l, r] for absolute sample i, counted across calls on the same
+// processor so the input never jumps between runs. perBlock(b) is called before each block (b counts from 0 per call).
+// Returns this call's {L, R} output arrays.
 export function run(proc, blocks, input, perBlock) {
-  const L = new Float32Array(blocks * 128), R = new Float32Array(blocks * 128);
+  const L = new Float32Array(blocks * 128), R = new Float32Array(blocks * 128), t0 = proc._t || 0;
+  proc._t = t0 + blocks * 128;
   for (let b = 0; b < blocks; b++) {
     if (perBlock) perBlock(b);
     const iL = new Float32Array(128), iR = new Float32Array(128);
-    for (let i = 0; i < 128; i++) { const [l, r] = input(b * 128 + i); iL[i] = l; iR[i] = r; }
+    for (let i = 0; i < 128; i++) { const [l, r] = input(t0 + b * 128 + i); iL[i] = l; iR[i] = r; }
     const oL = new Float32Array(128), oR = new Float32Array(128);
     proc.process([[iL, iR]], [[oL, oR]]);
     L.set(oL, b * 128); R.set(oR, b * 128);

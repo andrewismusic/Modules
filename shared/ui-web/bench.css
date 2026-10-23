@@ -1,0 +1,58 @@
+/* Moved from prototype/moment-prism-relay-v30.html (v30). */
+/* ---------- test bench (not part of the module) ---------- */
+.bench{background:var(--face);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.bench-tag{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-bottom:10px}
+.top h1{margin:0;font-size:1.9rem;line-height:1;font-weight:800;letter-spacing:-.01em}
+.status{color:var(--ink2);font-size:.82rem;margin-left:auto;text-align:right;line-height:1.25}
+.status b{color:var(--ink);font-weight:600}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--well);border-radius:8px;padding:2px;gap:2px}
+.seg button{white-space:nowrap;border:0;background:transparent;border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:500;color:var(--ink2);min-height:30px}
+.seg button[aria-pressed="true"]{background:var(--cap);color:#1D2125;box-shadow:0 1px 2px rgba(0,0,0,.25);font-weight:600}
+.play{border:0;border-radius:9px;min-height:40px;padding:0 16px;font-weight:700;cursor:pointer;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;gap:8px}
+.play svg{width:13px;height:13px;fill:currentColor}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.mini{border:0;border-radius:7px;background:var(--well);padding:4px 6px;min-height:30px}
+.chip{border:0;border-radius:999px;background:var(--well);color:var(--ink2);padding:0 12px;min-height:30px;font-weight:600;cursor:pointer;font-size:.88rem}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ghostbtn{border:0;background:transparent;color:var(--ink2);text-decoration:underline;cursor:pointer;padding:4px}
+.spring{display:inline-flex;align-items:center;gap:5px;font-size:.85rem;color:var(--ink2);cursor:pointer}
+.fxlist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 16px}
+.fxlist li{color:var(--c);font-weight:700;font-size:1rem;text-shadow:0 0 10px color-mix(in srgb,var(--c) 45%,transparent)}
+.fxlist li b{opacity:.7;margin-right:2px}
+.fxlist li.byp{text-decoration:line-through;opacity:.6;text-shadow:none}
+.fxlist em{font-style:normal;font-weight:500;font-size:.8rem}
+.fxwell{background:#0b0e1a;border-radius:9px;padding:8px 12px}
+.keys{color:var(--ink2);font-size:.8rem;margin:0}
+.knob{display:flex;flex-direction:column;align-items:center;min-width:0;touch-action:none;cursor:ns-resize;-webkit-user-select:none;user-select:none;outline:none}
+.knob svg{width:40px;height:40px;display:block;border-radius:50%}
+.knob.sm svg{width:32px;height:32px}
+.knob .trk{fill:none;stroke:var(--well);stroke-width:3.4;stroke-linecap:round}
+.knob .val{fill:none;stroke:var(--kc,var(--ink));stroke-width:3.4;stroke-linecap:round}
+.knob .body{fill:var(--cap);stroke:var(--cap-edge);stroke-width:1}
+.knob .ptr{stroke:#1D2125;stroke-width:2;stroke-linecap:round}
+.knob .kv{font-size:.72rem;color:var(--ink2);line-height:1.15;white-space:nowrap}
+.knob .kl{font-size:.76rem;font-weight:600;line-height:1.15;white-space:nowrap;order:-1}
+.knob.sm .kl{order:0}
+.knob:focus-visible svg{outline:2px solid var(--ice);outline-offset:1px}
+
+/* bench: modulation and combinations */
+.bench.wide{grid-column:1/-1}
+.lfobox{display:flex;flex-wrap:wrap;gap:10px;width:100%}
+.lfocard{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;background:var(--well);}
+.seg.sm button{padding:4px 8px;font-size:.8rem}
+.bout{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:16px;padding:4px 10px 4px 4px;background:#2a2e33;color:#fff;font-weight:700;font-size:.8rem;cursor:pointer}
+.bout .bj{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#111 0 35%,#9aa0a5 38% 60%,#5d6267 62%)}
+.bout .bm{position:relative;width:40px;height:6px;border-radius:3px;background:#444}.bout .bm i{position:absolute;top:0;bottom:0;background:#ffe066;border-radius:3px}
+.bout.psel,.module .jk.psel{outline:2px solid #ffb347;outline-offset:3px;border-radius:12px}
+.gatebtn{border:0;border-radius:10px;padding:10px 16px;font-weight:800;background:#3a3f45;color:#fff;cursor:pointer;touch-action:none}.gatebtn.on{background:#ffe066;color:#222}
+.patchrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
+.patchlist{display:flex;flex-wrap:wrap;gap:6px}.pcable{display:inline-flex;align-items:center;gap:6px;padding:3px 4px 3px 10px;border-radius:12px;background:var(--well);border-left:4px solid var(--pc);font-size:.85rem;font-weight:600}
+.pdel{border:0;background:transparent;font-size:1rem;cursor:pointer;color:var(--ink)}
+.module .jk.pport{cursor:pointer}
+.module .jk.patched svg{filter:drop-shadow(0 0 4px var(--pc))}
+.module .jk.patched svg circle:first-of-type{stroke:var(--pc)}
+.module .jk.patched::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--pc);box-shadow:0 0 6px var(--pc);top:18px;left:50%;margin-left:-6px;pointer-events:none}
+.combos .combogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 24px;width:100%}
+.combos h4{margin:6px 0 4px;font-size:.9rem}.combos ul{margin:0;padding-left:18px;font-size:.9rem;line-height:1.45}

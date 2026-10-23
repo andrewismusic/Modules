@@ -138,11 +138,11 @@ changes.
 ## 5. Key-grammar decisions (resolved)
 
 **Press vs release.** All keys on every device act on **release**, including Relay's Random 1, Random 2 and Bypass.
-(The v30 prototype still acts on press for Relay's keys; change this in the new code.) On Relay, a key released after
-being used in a Shift combination does not also do its own action.
+(The v30 prototype still acts on press for Relay's keys; the Relay web demo acts on release.) On Relay, a key released
+after being used in a Shift combination does not also do its own action.
 
 **Opening settings.** Different on purpose, and staying that way. On Relay, Shift + Bypass opens the screen menu
-immediately. On Moment and Prism, which have no screen, Shift + Bypass must be held for 3 s to enter settings mode.
+immediately, as Bypass goes down (decided 2026-10-23: the one key action on press). On Moment and Prism, which have no screen, Shift + Bypass must be held for 3 s to enter settings mode.
 
 **Relay CV.** Relay has no Random-membership or CV-assignment gestures; its CV is configured in the screen menu.
 

@@ -1,0 +1,67 @@
+/* Moved from prototype/moment-prism-relay-v30.html (v30). */
+/* Relay desktop pyramid: real CSS 3D (preserve-3d) with every control built as a solid (cylinders from facets,
+   keys and fader cap as boxes). One key light from the upper left front plus ambient: JS sets per-face light
+   variables as the pyramid turns, so faces, control sides, control shadows and the cast shadow on the floor follow it. */
+.pyrwrap{margin:14px 0 10px;padding:12px;border-radius:14px;background:var(--panel,#e6e8e4)}
+.pyrhead{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.pyrstage{position:relative;height:640px;perspective:2200px;perspective-origin:50% 45%;overflow:hidden;border-radius:12px;cursor:grab;touch-action:none;user-select:none;
+  background:radial-gradient(120% 90% at 50% 20%,#f3f4f1 0%,#e3e5e1 60%,#d7dad5 100%)}
+.pscene{position:absolute;left:50%;top:500px;width:0;height:0;transform-style:preserve-3d}
+.pyr{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+.pground{position:absolute;left:-700px;top:-700px;width:1400px;height:1400px;transform:translateY(1px) rotateX(90deg);pointer-events:none}
+.pface{position:absolute;left:-220px;top:-458px;width:440px;height:458px;transform-origin:50% 100%;transform-style:preserve-3d;pointer-events:none;
+  --fb:1;--ltx:0;--lty:0;--lx:0;--ly:0;--so:.3;color:#1F2226}
+.ptri{position:absolute;left:0;top:0;width:440px;height:458px;overflow:visible}
+.pctl{position:absolute;transform-style:preserve-3d;pointer-events:auto}
+.pctl i{position:absolute;display:block}
+.stk{border-radius:50%;pointer-events:none}.stk.hexm{border-radius:0;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.stk.ringm{-webkit-mask:radial-gradient(circle,transparent 56.5px,#000 57.5px);mask:radial-gradient(circle,transparent 56.5px,#000 57.5px)}
+.fc{backface-visibility:hidden;--lb:calc(0.55 + 0.5*max(0,calc(var(--nx)*var(--ltx) + var(--ny)*var(--lty))));
+  background:rgb(calc(var(--r)*var(--lb)) calc(var(--g)*var(--lb)) calc(var(--b)*var(--lb)))}
+.fc.bv{backface-visibility:visible}
+.shd{box-shadow:calc(var(--lx)*var(--h)*1px) calc(var(--ly)*var(--h)*1px) calc(3px + var(--h)*.5px) rgba(0,0,0,var(--so)),0 0 2px rgba(0,0,0,.28)}
+.lit{filter:brightness(var(--fb))}
+.plab{position:absolute;transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#5d646b;white-space:nowrap;
+  text-shadow:0 1px 0 rgba(255,255,255,.7);pointer-events:none}
+.plab.pk{color:#E0418F;font-size:8px}
+/* keys */
+.pkey{width:58px;height:52px;cursor:pointer;touch-action:none;transition:transform .06s}
+.pkey.pressed{transform:translateZ(-5px)}
+.pkey .kb{inset:0;border-radius:5px}
+.pkey .kt{left:0;top:0;width:58px;height:52px;border-radius:5px;transform:translateZ(9px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#fff;
+  background:linear-gradient(180deg,#78c6f2,#4198cd);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -3px 4px rgba(0,0,0,.18)}
+.pkey.sh .kt{background:linear-gradient(180deg,#ff97cf,#e0559f)}
+.pkey .kt .ico{width:17px;height:17px}.pkey .kt .ktx{font-size:6.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+.pkey .kled{position:absolute;right:6px;top:6px;width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.18)}
+.pkey.red .kled{background:#ff3b3b;box-shadow:0 0 6px #ff3b3b}
+/* dial */
+.pdial{width:150px;height:150px;cursor:grab;touch-action:none}
+.pdial .ring{left:0;top:0;width:150px;height:150px;border-radius:50%;transform:translateZ(10px);
+  background:repeating-conic-gradient(from 0deg,#4a4f55 0 3deg,#2a2d31 3deg 6deg);
+  -webkit-mask:radial-gradient(circle,transparent 56.5px,#000 57.5px);mask:radial-gradient(circle,transparent 56.5px,#000 57.5px)}
+.pdial .ringhl{left:0;top:0;width:150px;height:150px;border-radius:50%;transform:translateZ(10.2px);pointer-events:none;
+  background:radial-gradient(circle at calc(50% - var(--lx)*18%) calc(50% - var(--ly)*18%),rgba(255,255,255,.28),transparent 55%);
+  -webkit-mask:radial-gradient(circle,transparent 56.5px,#000 57.5px);mask:radial-gradient(circle,transparent 56.5px,#000 57.5px)}
+.pdial canvas{position:absolute;left:18px;top:18px;width:114px;height:114px;border-radius:50%;transform:translateZ(4px);background:#050608}
+.pdial .glass{left:18px;top:18px;width:114px;height:114px;border-radius:50%;transform:translateZ(4.3px);pointer-events:none;
+  background:radial-gradient(circle at calc(50% - var(--lx)*22%) calc(50% - var(--ly)*22%),rgba(255,255,255,.14),transparent 45%),radial-gradient(circle,transparent 50px,rgba(0,0,0,.55) 57px)}
+/* fader */
+.pfader{width:56px;height:224px;cursor:pointer;touch-action:none}
+.pfader .slot{left:24px;top:-6px;width:8px;height:236px;border-radius:4px;background:#121416;box-shadow:inset 0 2px 3px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.7)}
+.pfcap{left:3px;width:50px;height:26px;margin-top:-13px;transform-style:preserve-3d}
+.pfcap .ct{left:0;top:0;width:50px;height:26px;border-radius:3px;transform:translateZ(13px);
+  background:repeating-linear-gradient(180deg,#eceee9 0 3px,#d4d7d1 3px 4px);box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+.pfcap .ct::after{content:"";position:absolute;left:4px;right:4px;top:12px;height:2px;background:#1D2125}
+/* knobs and LED rings */
+.pknob{width:80px;height:80px;cursor:ns-resize;touch-action:none}
+.pknob svg{position:absolute;left:0;top:0;width:80px;height:80px;pointer-events:none}
+.pknob .skirt{left:13px;top:13px;width:54px;height:54px;border-radius:50%;transform:translateZ(4px);background:radial-gradient(circle,#8c9196 0 21px,#a9aeb3 22px,#7d8287 27px)}
+.pknob .cap{left:18px;top:18px;width:44px;height:44px;border-radius:50%;transform:translateZ(15px);
+  background:radial-gradient(circle at calc(50% - var(--lx)*16%) calc(50% - var(--ly)*16%),#fff,#dfe2e5 42%,#aeb3b8 100%)}
+.pknob .ptr{left:39px;top:20px;width:2px;height:14px;border-radius:1px;background:#1D2125;transform-origin:1px 20px;transform:translateZ(15.3px) rotate(var(--a))}
+/* 1/4-inch jacks */
+.pjack{width:40px;height:40px}
+.pjack .hex{left:2.68px;top:5px;width:34.64px;height:30px;transform:translateZ(3px);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);
+  background:linear-gradient(160deg,#eef0f2,#b9bec3)}
+.pjack .top{left:10.5px;top:10.5px;width:19px;height:19px;border-radius:50%;transform:translateZ(8px);
+  background:radial-gradient(circle,#070809 0 5px,#3a3e42 5.6px,#c9cdd2 7px,#9da2a8 9.5px)}

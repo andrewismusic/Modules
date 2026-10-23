@@ -1,0 +1,24 @@
+/* Moved from prototype/moment-prism-relay-v30.html (v30). */
+:root{
+  --cvA:#7cf29a;--cvB:#8f9bff;--cvC:#ff7a59;--cvD:#ffe066;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#C4C8C0;--face:#D8DBD4;--well:#B2B7AD;--ink:#1D2125;--ink2:#535B62;--cap:#F6F7F3;--cap-edge:#8C9288;--ice:#1A86BD;--warn:#C0392B;
+  --pn1:#DCDFD9;--pn2:#C9CDC6;--pl:#22262A;--pl2:#4A5157;--pw:#A9AEA6;
+  --shadow:0 1px 0 rgba(255,255,255,.6) inset,0 2px 6px rgba(40,46,40,.18);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17191C;--face:#24282C;--well:#111316;--ink:#E6E9E3;--ink2:#99A2A9;--cap:#D9DCD5;--cap-edge:#6F776F;--ice:#5CC4F2;--warn:#F2645E;
+  --pn1:#2A2E33;--pn2:#202327;--pl:#E2E5DF;--pl2:#9BA3AA;--pw:#121417;--shadow:0 1px 0 rgba(255,255,255,.05) inset,0 2px 8px rgba(0,0,0,.4);}}
+:root[data-theme="dark"]{
+  --bg:#17191C;--face:#24282C;--well:#111316;--ink:#E6E9E3;--ink2:#99A2A9;--cap:#D9DCD5;--cap-edge:#6F776F;--ice:#5CC4F2;--warn:#F2645E;
+  --pn1:#2A2E33;--pn2:#202327;--pl:#E2E5DF;--pl2:#9BA3AA;--pw:#121417;--shadow:0 1px 0 rgba(255,255,255,.05) inset,0 2px 8px rgba(0,0,0,.4);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Barlow Semi Condensed','Arial Narrow',system-ui,sans-serif;font-size:15px;line-height:1.35;
+  -webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:1240px;margin:0 auto;padding:12px 12px 32px}
+.msg{color:var(--warn);font-weight:600}
+

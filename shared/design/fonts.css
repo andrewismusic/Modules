@@ -1,0 +1,12 @@
+/* Barlow Semi Condensed (SIL Open Font Licence), Latin subset, embedded in the built demo. Falls back to a system
+   condensed face if it ever fails to load. */
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:400;font-display:swap;
+  src:url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;
+  src:url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;
+  src:url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;
+  src:url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:800;font-display:swap;
+  src:url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-800-normal.woff2') format('woff2')}

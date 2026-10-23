@@ -57,8 +57,9 @@ Bypass on any module: its Bypass key light turns red, all other lights dim; cont
 
 ## Key grammar across devices (decided)
 - All keys on every device act on release, Relay included. (The v30 prototype still acts on press for Relay's keys;
-  the new code changes this.)
-- Shift + Bypass opens Relay's menu immediately. Moment and Prism need it held 3 s to enter settings mode. This
-  difference is intended: Relay has a screen.
+  the Relay web demo acts on release.) A key used in a Shift combination does not also do its own action on release,
+  and neither does Shift.
+- Shift + Bypass opens Relay's menu as Bypass goes down: the one key action on press. The release that follows does
+  nothing. Moment and Prism need it held 3 s to enter settings mode. This difference is intended: Relay has a screen.
 - The enter/back grammar (Bypass = enter, Shift = back) is the same in Relay's screens and in Moment/Prism settings.
 - Relay has no Random-membership or CV-assignment gestures; its CV is configured in the menu.

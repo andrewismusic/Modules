@@ -25,6 +25,18 @@ C++ for hardware and plugins. See `docs/HANDOFF.md`.
 | Device specs | `devices/relay/SPEC.md`, `devices/moment/SPEC.md`, `devices/prism/SPEC.md` |
 | What was tried and removed | `docs/decisions.md` |
 
+## Running the demos
+
+Requires Node.js 20 or later. Run `npm install` once, then:
+
+| Command | What it does |
+|---|---|
+| `npm run dev:relay` | Relay demo on a local development server |
+| `npm run build:relay` | Builds the Relay demo into one file, `devices/relay/web-demo/relay.html` |
+| `npm test` | Behaviour checks (worklet, dead zone, Shuffler, clicks, keys, randomize rules) |
+
+The built `relay.html` is committed, so it can be shared as a single file.
+
 ## Setting up the repository
 
 1. Unzip this package into an empty folder.
