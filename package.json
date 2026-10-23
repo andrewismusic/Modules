@@ -1,0 +1,16 @@
+{
+  "name": "moment-prism-relay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:relay": "vite devices/relay/web-demo",
+    "build:relay": "vite build devices/relay/web-demo",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "vite": "^7.3.7",
+    "vite-plugin-singlefile": "^2.3.4",
+    "vitest": "^3.2.7"
+  }
+}
