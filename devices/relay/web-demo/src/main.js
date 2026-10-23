@@ -25,8 +25,8 @@ $('#kA').innerHTML=KL(ICON_DICE,'Random 1');$('#kB').innerHTML=KL(ICON_DICE3,'Ra
 
 function refreshAll(){muOttK.update();muMixK.update();refreshClock();setMacro(MU().macro);setBypass(MU().bypass);setDial(MU().dial);renderFx();selectSource(state.src);updateLatency();}
 
-/* ---------- computer keyboard: Z Shift, A Random 1, B Random 2, X Bypass, arrows scroll menus, Space play ---------- */
-const KEYMAP={a:'r1',b:'r2',x:'byp',z:'sh'};
+/* ---------- computer keyboard: Z Shift, X Random 1, C Random 2, V Bypass, arrows scroll menus, Space play ---------- */
+const KEYMAP={z:'sh',x:'r1',c:'r2',v:'byp'};
 window.addEventListener('blur',clearKeys);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearKeys();});
 document.addEventListener('keydown',e=>{
   if(e.target.closest('input,select,textarea')||e.metaKey||e.ctrlKey||e.altKey)return;
@@ -54,6 +54,7 @@ function frame(now){
   const m=engineMain?engineMain.macro:(ctx?MU().macroEff:MU().macro);
   $('#ghost').style.left=(m*100)+'%';$('#ghost').classList.toggle('on',Math.abs(m-MU().macro)>0.01);
   if(engineMain&&engineMain.recovered){engineMain.recovered=false;syncAll();}
+  $('#kA').classList.toggle('pink',SCR.mode==='save');$('#kB').classList.toggle('pink',SCR.mode==='load');
   pyramidFrame();drawScreen(now);requestAnimationFrame(frame);
 }
 

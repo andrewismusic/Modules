@@ -32,7 +32,9 @@ export class RelayEngine{
     switch(type){
       case'filter':return new FxFilter(this);case'formant':return new FxFormant(this);
       case'delay':return new FxDelay(this);case'reverb':return new FxReverb(this);case'shimmer':return new FxShimmer(this);
-      case'granular':return new FxGranular(this);case'smear':return new FxSmear(this);case'thin':return new FxThin(this);
+      case'granular':return new FxGranular(this);case'smear':return new FxSmear(this);
+      /* Relay's Thin keeps Ring tilt's decay tilt but not its pitch-moved harmonics (no pitch shifting in Relay's spectral effects) */
+      case'thin':{const f=new FxThin(this);f.rgx.tiltHarm=0;return f;}
       case'buffer':return new FxBuffer(this);case'shuffle':return new FxShuffle(this);case'freqshift':return new FxFreqShift(this);case'phaser':return new FxPhaser(this);
       case'lofi':return new FxLofi(this);case'tremolo':return new FxTremolo(this);case'drive':return new FxDrive(this);case'chorus':return new FxChorus(this);case'tapestop':return new FxTapeStop(this);
     }

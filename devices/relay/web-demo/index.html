@@ -14,26 +14,6 @@
     <h1>Relay</h1><span class="bench-tag">Macro multi-effect</span>
     <div class="status" id="status">Press play to start audio</div>
   </header>
-  <div class="rackwrap"><div class="rack" id="rack">
-    <div class="mwrap" id="wrapMu"><div class="module mu" id="modMu" aria-label="Relay multi-effect module, 16HP"><span class="hole tl"></span><span class="hole tr"></span><span class="hole bl"></span><span class="hole br"></span><div class="mname">RELAY</div>
-<div class="jg jg5"><div><i data-jack="In L"></i></div><div><i data-jack="In R"></i></div><div><i data-jack="Clock"></i></div><div><i data-jack="Out L"></i></div><div><i data-jack="Out R"></i></div></div>
-<div class="jg jg5 r2"><div><i data-jack="CV 1"></i></div><div><i data-jack="CV 2"></i></div><div><i data-jack="CV 3"></i></div><div><i data-jack="Fader"></i></div><div><i data-jack="Dial"></i></div></div>
-<div class="mid">
-  <div class="dialwrap">
-    <div class="cell kn tl"><span class="lg lab"><b class="p">Dry/wet</b></span><span id="muMixK"></span></div>
-    <div class="dial" id="dial" tabindex="0" role="slider" aria-label="Dial: deviation, or scrolling in menus" aria-valuemin="0" aria-valuemax="100"><div class="ring" id="ring"></div><div class="ringlip"></div><canvas id="screen"></canvas></div>
-    <div class="cell kn tr"><span class="lg lab"><b class="p">OTT</b></span><span id="muOttK"></span></div>
-  </div>
-  <div class="vsp"></div>
-  <div class="fader" id="fader" tabindex="0" role="slider" aria-label="Fader" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="groove"></div><div class="ghost" id="ghost"></div><div class="fcap" id="fcap"></div></div>
-  <div class="vsp"></div>
-</div>
-<div class="r-keys rk-r"><div class="keyblk"><div class="pair"><button class="key sh" id="kSh" aria-label="Shift (back / cancel in menus)"></button><button class="key rk" id="kA" aria-label="Random 1: new effects. Shift + Random 1: save"></button><button class="key rk" id="kB" aria-label="Random 2: new settings and ranges. Shift + Random 2: load"></button><button class="key byp" id="kByp" aria-label="Bypass (enter in menus). Shift + Bypass: menu"></button></div><div class="pairlg"><span class="lg shl">Shift</span><span class="lg shl">Save</span><span class="lg shl">Load</span><span class="lg shl">Menu</span></div></div></div></div></div>
-  </div></div>
-  <section class="pyrwrap" aria-label="Relay desktop concept">
-    <div class="pyrhead"><button class="chip" id="pyrL" aria-label="Turn left">◀</button><button class="chip" id="pyrR" aria-label="Turn right">▶</button></div>
-    <div class="pyrstage" id="pyrStage"><div class="pscene" id="pgscene"><canvas class="pground" id="pground" width="1400" height="1400"></canvas></div><div class="pscene" id="pscene"><div class="pyr" id="pyr"></div></div></div>
-  </section>
   <div class="benchgrid">
     <div class="bench" aria-label="Test bench">
       <span class="bench-tag">Test bench</span>
@@ -55,13 +35,33 @@
       <button class="ghostbtn" id="resetState" style="margin-left:auto">Reset saved state</button>
     </div>
   </div>
+  <div class="rackwrap"><div class="rack" id="rack">
+    <div class="mwrap" id="wrapMu"><div class="module mu" id="modMu" aria-label="Relay multi-effect module, 16HP"><span class="hole tl"></span><span class="hole tr"></span><span class="hole bl"></span><span class="hole br"></span><div class="mname">RELAY</div>
+<div class="jg jg5"><div><i data-jack="In L"></i></div><div><i data-jack="In R"></i></div><div><i data-jack="Clock"></i></div><div><i data-jack="Out L"></i></div><div><i data-jack="Out R"></i></div></div>
+<div class="jg jg5 r2"><div><i data-jack="CV 1"></i></div><div><i data-jack="CV 2"></i></div><div><i data-jack="CV 3"></i></div><div><i data-jack="Fader"></i></div><div><i data-jack="Dial"></i></div></div>
+<div class="mid">
+  <div class="dialwrap">
+    <div class="cell kn tl"><span class="lg lab"><b class="p">Dry/wet</b></span><span id="muMixK"></span></div>
+    <div class="dial" id="dial" tabindex="0" role="slider" aria-label="Dial: deviation, or scrolling in menus" aria-valuemin="0" aria-valuemax="100"><div class="ring" id="ring"></div><div class="ringlip"></div><canvas id="screen"></canvas></div>
+    <div class="cell kn tr"><span class="lg lab"><b class="p">OTT</b></span><span id="muOttK"></span></div>
+  </div>
+  <div class="vsp"></div>
+  <div class="fader" id="fader" tabindex="0" role="slider" aria-label="Fader" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="groove"></div><div class="ghost" id="ghost"></div><div class="fcap" id="fcap"></div></div>
+  <div class="vsp"></div>
+</div>
+<div class="r-keys rk-r"><div class="keyblk"><div class="pair"><button class="key sh" id="kSh" aria-label="Shift (back / cancel in menus)"></button><button class="key rk" id="kA" aria-label="Random 1: new effects. Shift + Random 1: save"></button><button class="key rk" id="kB" aria-label="Random 2: new settings and ranges. Shift + Random 2: load"></button><button class="key byp" id="kByp" aria-label="Bypass (enter in menus). Shift + Bypass: menu"></button></div><div class="pairlg"><span class="lg shl">Shift</span><span class="lg shl">Save</span><span class="lg shl">Load</span><span class="lg shl">Menu</span></div></div></div></div></div>
+  </div></div>
+  <section class="pyrwrap" aria-label="Relay desktop concept">
+    <div class="pyrhead"><button class="chip" id="pyrL" aria-label="Turn left">◀</button><button class="chip" id="pyrR" aria-label="Turn right">▶</button></div>
+    <div class="pyrstage" id="pyrStage"><div class="pscene" id="pgscene"><canvas class="pground" id="pground" width="1400" height="1400"></canvas></div><div class="pscene" id="pscene"><div class="pyr" id="pyr"></div></div></div>
+  </section>
   <div class="bench wide combos" aria-label="Button combinations" id="keyhelp">
     <span class="bench-tag">Button combinations</span>
     <div class="combogrid">
       <div><h4>Keys</h4><ul><li>Random 1: new effects</li><li>Random 2: new settings and fader ranges</li><li>Bypass: on or off</li><li>Keys act when you let go</li></ul></div>
       <div><h4>With Shift</h4><ul><li>Shift + Random 1: save (dial picks the slot)</li><li>Shift + Random 2: load</li><li>Shift + Bypass: menu (opens straight away)</li><li>In menus: dial scrolls, Bypass enters or confirms, Shift goes back or cancels</li></ul></div>
       <div><h4>Dial and fader</h4><ul><li>Fader: brings the four effects in across its travel; the first 3% is dry</li><li>Dial: turn clockwise to move every setting toward its own destination</li></ul></div>
-      <div><h4>Computer keyboard</h4><ul><li>Z Shift, A Random 1, B Random 2, X Bypass</li><li>Arrows scroll menus</li><li>Space: play or stop</li></ul></div>
+      <div><h4>Computer keyboard</h4><ul><li>Z Shift, X Random 1, C Random 2, V Bypass</li><li>Arrows scroll menus</li><li>Space: play or stop</li></ul></div>
     </div>
   </div>
 </div>

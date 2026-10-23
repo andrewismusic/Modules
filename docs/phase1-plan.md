@@ -53,10 +53,12 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
 ## Notes from building the Relay demo
 - **Worklet loading.** Pages opened straight from disk (`file://`) refuse Blob-URL worklets in Chromium; the demo then
   loads the same source from a `data:` URL, so it runs on the AudioWorklet either way.
-- **Dead zone and OTT.** The four slots are exactly dry in the dead zone. OTT (default 50%, not following the fader)
-  sits after them, so the whole output is bit-exact only with OTT at 0. Behaviour unchanged from v30; the spec's "exactly
-  dry" wording is open for the designer.
+- **Dead zone and OTT.** The four slots are exactly dry in the dead zone; OTT (default 50%) still applies, and is dry
+  fully counter-clockwise. The designer confirmed this is intended; the spec now says so.
 - **Limiter look-ahead.** 95 samples at 48 kHz (1.98 ms): the buffer delays by its length minus one.
 - **Click levels (click-metric.js, 220 Hz sine).** Hard gain step 156×; Shuffler slice edges with the controls still
   about 9×; smoothed moves 1–3×; Buffer fader sweeps up to about 9× (its 6 ms chunk crossfades); Spectral thin at very
   low Keep spikes up to 15× with the controls still (the effect itself).
+- **Review round 1 (2026-10-23).** Bench moved to the top; keyboard Z/X/C/V; Random keys light white when held and pink
+  in Save / Load; chunkier pyramid keys (module key tops) and knobs; no fader label on the pyramid; Ring tilt's
+  pitch-moved harmonics switched off in Relay's Thin (kept for Prism).

@@ -6,7 +6,8 @@
 Signal path: four effect slots in series, each with a range on the fader → Dry/wet → OTT (parallel 3-band
 upward/downward compression, defaults to 50%, true bypass at 0) → bypass → 2 ms look-ahead limiter (ceiling 0.8).
 Each effect is only heard once it is inside its range (it fades in over the first 6% of its range), so with the fader
-in the dead zone Relay is exactly dry. Click control: the fader is smoothed in two stages (no staircase when it is moved
+in the dead zone the four effects are exactly dry. OTT still applies at its own setting (it is dry fully
+counter-clockwise; its wet blend fades in over the first 4% of its knob, and its amount rises across the whole turn). Click control: the fader is smoothed in two stages (no staircase when it is moved
 quickly); dial and glide parameter changes are smoothed; each slot's position on the fader is smoothed (8 ms) so moving ranges never
 step; stepped settings (e.g. delay division) switch inside a 6 ms duck to the slot's input; effect swaps crossfade 40 ms. The dial re-sends only continuous settings, and the engine ignores a stepped setting
 re-sent unchanged (re-sending them every frame used to duck the slots at 60 Hz: the dial crackle, fixed in v30); smoothed
@@ -17,6 +18,8 @@ and Granular have inherent wet delays; others ~0.
   just above the keys
   (first 3% always dry, not printed; no position marker), keys left→right: Shift (blank pink cap;
   SHIFT), Random 1 (five-pip die; SAVE under it), Random 2 (three-pip die; LOAD), Bypass (tap toggles; MENU).
+  Key light lines: Random 1 and Random 2 light white while held; Random 1 lights pink while the Save screen is open,
+  Random 2 pink while Load is open; Bypass is red while bypassed.
 - Random 1 = new effects (a slot may be empty; ≥3 effects remain; Drive picked half as often; Buffer never last; Shuffler always
   the first or second effect in the chain: if it lands later it trades places with one of the first two, never Buffer).
   Random 2 = new settings and slider ranges. Both reset the dial and reroll its targets; the screen flashes RANDOM FX /
@@ -34,6 +37,8 @@ and Granular have inherent wet delays; others ~0.
   OTT (Follows fader, On in bypass), Random (Amount, Glide up to 16 bars, Ranges Random/Full), CV 1 / CV 2 / CV 3 (each set to Input or Output; Input:
   any of Random 1, Random 2, Bypass, Dry/wet, OTT, Random glide; Output (CV 1, CV 2 and CV 3 each): one of fader position, fader-moving gate,
   triggers on Random 1/2/either, random values on Random 1/2/either, envelope pre/post).
+- No pitch shifting in Relay's spectral effects: Spectral thin's Ring tilt makes highs or lows ring longer but does not
+  add the octave-up harmonics or octave-down copy it adds in Prism.
 - Effects: Filter, Formant, Drive (Tube/Tape/Fuzz), Delay, Reverb, Shimmer, Granular, Spectral smear, Spectral thin,
   Buffer, Freq shifter, Phaser, Chorus, Buffer (modes: Stutter = loops a tempo-synced slice of the last few seconds, slice length shortening as the fader
   rises; Reverse chunks = plays short chunks of the incoming audio backwards; Pitch = delay-line pitch shifter. Every
@@ -62,7 +67,9 @@ solid (stacked layers for round parts, boxes for keys and the fader cap). One ke
 ambient: face brightness, the sides of each control, each control's shadow on its face and the pyramid's cast shadow
 on the floor all follow the light as it turns (the floor is drawn on a separate layer underneath, so it never covers
 the pyramid). Face 1: dial (60 mm, knurled bezel, recessed live screen) with wide margins, keys Shift, Random 1,
-Random 2, Bypass below with Save / Load / Menu printed under them (Bypass has a red LED when bypassed). Face 2: the
+Random 2, Bypass below with Save / Load / Menu printed under them. The keys are chunky (20 px, 8 mm, proud of the face) and
+their tops match the module's keys, light line included (white / pink / red as on the module). Knobs stand 26 px proud.
+No fader label. Face 2: the
 fader running vertically down the centre, Dry/wet and OTT knobs with LED rings below it on either side (drag up/down,
 double-click resets). Face 3: five 1/4-inch jacks in one row near the bottom edge: Exp, In L, In R, Out L, Out R.
 Its controls drive the same Relay as the panel.

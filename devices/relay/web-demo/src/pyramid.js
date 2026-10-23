@@ -5,6 +5,7 @@ import { ICON_DICE, ICON_DICE3, ICON_BYP } from '../../../../shared/ui-web/icons
 import { state, MU } from './state.js';
 import { rKey, turnDial, setMacro, sendMix, sendOtt, muMixK, muOttK, ringRot } from './relay-ui.js';
 import { showOSD, screenCanvas } from './screen.js';
+import { SCR } from './menu.js';
 
 const $=s=>document.querySelector(s);
 /* ---------- RELAY DESKTOP (concept): a triangular pyramid; drag sideways (or use the arrows) to turn it ----------
@@ -32,12 +33,14 @@ export function buildPyramid(){
   const keys=[['sh','','','Shift'],['r1',ICON_DICE,'Random 1','Save'],['r2',ICON_DICE3,'Random 2','Load'],['byp',ICON_BYP,'Bypass','Menu']];
   let f0=`<div class="pctl pdial" id="pdial" style="left:145px;top:207px" title="Dial"><i class="shd" style="--h:10;inset:0;border-radius:50%"></i>${pyStack(0,0,150,150,0,4,'#2c3035')}${pyStack(0,0,150,150,4,6,'#33373c','ringm')}
     <canvas id="pscreen"></canvas><i class="glass"></i><i class="ring lit" id="pring"></i><i class="ringhl"></i></div>`;
-  keys.forEach(([w,ic,t,lg],i)=>{const x=92+i*66,rgb=w==='sh'?[214,72,146]:[52,128,182];
-    f0+=`<div class="pctl pkey${w==='sh'?' sh':''}" data-w="${w}" role="button" aria-label="${t||'Shift'}" style="left:${x}px;top:376px"><i class="kb shd" style="--h:9"></i>${pyBox(58,52,9,rgb)}<i class="kt lit">${ic?`<span class="kic">${ic}</span><span class="ktx">${t}</span>`:''}${w==='byp'?'<span class="kled"></span>':''}</i></div>`+lab(x+29,436,lg,'pk');});
+  /* keys: chunky boxes (PKEY_H tall) with the module's key tops: cap, dish, thin LED line, icon and name */
+  const PKEY_H=20;
+  keys.forEach(([w,ic,t,lg],i)=>{const x=92+i*66,rgb=w==='sh'?[224,85,159]:[63,147,201];
+    f0+=`<div class="pctl pkey${w==='sh'?' sh':''}" data-w="${w}" role="button" aria-label="${t||'Shift'}" style="left:${x}px;top:376px"><i class="kb shd" style="--h:${PKEY_H}"></i>${pyBox(58,52,PKEY_H,rgb)}<i class="kt lit" style="transform:translateZ(${PKEY_H}px)"><span class="lline"></span>${ic?`<span class="kic">${ic}</span><span class="ktx">${t}</span>`:''}</i></div>`+lab(x+29,442,lg,'pk');});
   /* face 1: vertical fader, Dry/wet and OTT knobs below it either side */
-  let f1=`${lab(220,96,'Fader')}<div class="pctl pfader" id="pfader" style="left:192px;top:118px" title="Fader"><i class="slot"></i><div class="pctl pfcap" id="pfcap"><i class="shd" style="--h:13;inset:0;border-radius:3px"></i>${pyBox(50,26,13,[214,216,210])}<i class="ct lit"></i></div></div>`;
+  let f1=`<div class="pctl pfader" id="pfader" style="left:192px;top:118px" title="Fader"><i class="slot"></i><div class="pctl pfcap" id="pfcap"><i class="shd" style="--h:13;inset:0;border-radius:3px"></i>${pyBox(50,26,13,[214,216,210])}<i class="ct lit"></i></div></div>`;
   for(const[id,x,t]of[['pMixK',120,'Dry/wet'],['pOttK',320,'OTT']])
-    f1+=lab(x,338,t)+`<div class="pctl pknob" id="${id}" style="left:${x-40}px;top:352px" title="${t}"><svg viewBox="0 0 80 80"></svg><i class="shd" style="--h:15;left:13px;top:13px;width:54px;height:54px;border-radius:50%"></i>${pyStack(13,13,54,54,0,4,'#8f9499')}<i class="skirt lit"></i>${pyStack(18,18,44,44,4,11,'#b9bdc2')}<i class="cap lit"></i><i class="ptr"></i></div>`;
+    f1+=lab(x,338,t)+`<div class="pctl pknob" id="${id}" style="left:${x-40}px;top:352px" title="${t}"><svg viewBox="0 0 80 80"></svg><i class="shd" style="--h:26;left:13px;top:13px;width:54px;height:54px;border-radius:50%"></i>${pyStack(13,13,54,54,0,6,'#8f9499')}<i class="skirt lit"></i>${pyStack(18,18,44,44,6,20,'#b9bdc2')}<i class="cap lit"></i><i class="ptr"></i></div>`;
   /* face 2: the five 1/4-inch jacks in one row near the bottom edge */
   let f2='';['Exp','In L','In R','Out L','Out R'].forEach((t,i)=>{const x=80+i*70;f2+=lab(x,378,t)+`<div class="pctl pjack" style="left:${x-20}px;top:392px" title="${t}"><i class="shd" style="--h:6;left:6px;top:6px;width:28px;height:28px;border-radius:50%"></i>${pyStack(2.68,5,34.64,30,0,3,'#a7acb1','hexm')}<i class="hex lit"></i>${pyStack(10.5,10.5,19,19,3,5,'#9ca1a6')}<i class="top lit"></i></div>`;});
   py.innerHTML=[f0,f1,f2].map((c,k)=>`<div class="pface" data-k="${k}" style="transform:rotateY(${k*120}deg) translateZ(${PY.RI}px) rotateX(${PY.B*180/Math.PI}deg)">${tri}${c}</div>`).join('');
@@ -90,6 +93,7 @@ export function pyramidFrame(){
   const c=$('#pscreen'),scr=screenCanvas();if(!c||!scr)return;const g=c.getContext('2d');if(c.width!==scr.width){c.width=scr.width;c.height=scr.height;}g.clearRect(0,0,c.width,c.height);g.drawImage(scr,0,0);
   const cap=$('#pfcap');if(cap)cap.style.top=((1-MU().macro)*100)+'%';
   const k=$('.pkey[data-w="byp"]');if(k)k.classList.toggle('red',!!MU().bypass);
+  for(const[w,mode]of[['r1','save'],['r2','load']]){const e=$(`.pkey[data-w="${w}"]`);if(e)e.classList.toggle('pink',SCR.mode===mode);}
   const rg=$('#pring');if(rg)rg.style.transform=`translateZ(10px) rotate(${ringRot}rad)`;
   for(const[id,v]of[['pMixK',state.mu.mix],['pOttK',state.mu.ott]]){if(PYK[id]===v)continue;PYK[id]=v;const el=$('#'+id);if(!el)continue;el.querySelector('svg').innerHTML=pyLed(v);el.querySelector('.ptr').style.setProperty('--a',(-135+270*v)+'deg');}
 }

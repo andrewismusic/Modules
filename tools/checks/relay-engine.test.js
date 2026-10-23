@@ -62,3 +62,23 @@ describe('Shuffler determinism', () => {
     expect(JSON.stringify(ours)).toBe(JSON.stringify(Proto.pats()));
   });
 });
+
+describe('Relay pitch', () => {
+  // Relay's spectral effects do not shift pitch: Ring tilt in Spectral thin keeps its decay tilt but adds no
+  // octave-up harmonics or octave-down copy (Prism keeps them).
+  const level = (x, f, from) => { let re = 0, im = 0; for (let i = from; i < x.length; i++) { const a = 2 * Math.PI * f * i / 48000; re += x[i] * Math.cos(a); im += x[i] * Math.sin(a); } return Math.hypot(re, im) / (x.length - from); };
+  for (const [rtilt, f, name] of [[1, 880, 'an octave up'], [-1, 220, 'an octave down']]) it(`Thin with full Ring tilt adds nothing ${name}`, async () => {
+    const measure = harm => {
+      const p = w.make('relay-engine');
+      send(p, { type: 'fx', i: 0, fx: 'thin' }); send(p, { type: 'range', i: 0, a: 0.03, b: 1 });
+      for (const [k, v] of [['ring', 5], ['rtilt', rtilt], ['thr', -70]]) send(p, { type: 'param', i: 0, k, v });
+      p.e.slots[0].fx.rgx.tiltHarm = harm; send(p, { type: 'macro', v: 1 });
+      const { L } = run(p, 1200, i => { const v = 0.3 * Math.sin(2 * Math.PI * 440 * i / 48000); return [v, v]; });
+      return level(L, f, 600 * 128) / level(L, 440, 600 * 128);
+    };
+    const w = await loadWorklet(ENTRY);
+    const relayLevel = measure(0), withHarmonics = measure(1);
+    expect(withHarmonics).toBeGreaterThan(0.05); // the check can see them when they are there
+    expect(relayLevel).toBeLessThan(0.01);
+  });
+});

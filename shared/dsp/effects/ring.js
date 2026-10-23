@@ -7,7 +7,7 @@ export class FxRing{
     const sr=this.sr=e.sr,N=e.N||2048,nb=N/2+1;this.N=N;this.H=N/4;this.nb=nb;
     this.rm=[new Float64Array(nb),new Float64Array(nb)];this.rp=[new Float64Array(nb),new Float64Array(nb)];this.ri=[new Float64Array(nb),new Float64Array(nb)];this.pp=[new Float64Array(nb),new Float64Array(nb)];
     this.om=new Float64Array(nb);this.oct=new Float32Array(nb);for(let k=0;k<nb;k++){this.om[k]=2*Math.PI*k*this.H/N;this.oct[k]=Math.log2(Math.max(20,k*sr/N)/1000);}
-    this.ring=0;this.thr=-50;this.rtilt=0;this.rshift=0;this.rblend=0.5;this.any=false;this.live=0;this.quant=null;
+    this.ring=0;this.thr=-50;this.rtilt=0;this.tiltHarm=1;this.rshift=0;this.rblend=0.5;this.any=false;this.live=0;this.quant=null;
     this.voices=0;this.vglide=0.3;this.stealOld=0;this.V=[];this.vr=new Float64Array(nb);this.vi=new Float64Array(nb);
     this.ra=[new Float32Array(nb),new Float32Array(nb)];this.rg=new Uint8Array(nb);this.pks=new Int32Array(nb);
     this.sph=[0,1].map(()=>[0,1,2,3,4].map(()=>new Float64Array(nb)));this.sact=[0,1].map(()=>[0,1,2,3,4].map(()=>new Uint8Array(nb)));
@@ -54,7 +54,7 @@ export class FxRing{
     const sh=this.rshift,ht=Math.abs(this.rtilt),moves=[];
     if(Math.abs(sh)>0.01||this.quant){const b=this.rblend;moves.push([0,Math.pow(2,sh/12),Math.min(1,2*b)]);
       const go=Math.min(1,2*(1-b));if(go<1)for(let k=0;k<nb;k++)if(rg[k]){re[k]*=go;im[k]*=go;}}
-    if(ht>0.5){const h=Math.pow((ht-0.5)/0.5,0.8);if(this.rtilt>0){moves.push([1,2,0.8*h],[2,3,0.5*h],[3,4,0.3*h]);}else moves.push([4,0.5,0.95*h]);}
+    if(ht>0.5&&this.tiltHarm){const h=Math.pow((ht-0.5)/0.5,0.8);if(this.rtilt>0){moves.push([1,2,0.8*h],[2,3,0.5*h],[3,4,0.3*h]);}else moves.push([4,0.5,0.95*h]);}
     for(const[slot,R,gain]of moves){
       if(gain<=0.001)continue;const acc=this.sph[c][slot],act=this.sact[c][slot];
       for(let i=0;i<np;i++){

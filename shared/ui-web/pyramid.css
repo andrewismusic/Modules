@@ -26,14 +26,22 @@
 .plab.pk{color:#E0418F;font-size:8px}
 /* keys */
 .pkey{width:58px;height:52px;cursor:pointer;touch-action:none;transition:transform .06s}
-.pkey.pressed{transform:translateZ(-5px)}
+.pkey.pressed{transform:translateZ(-8px)}
 .pkey .kb{inset:0;border-radius:5px}
-.pkey .kt{left:0;top:0;width:58px;height:52px;border-radius:5px;transform:translateZ(9px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#fff;
-  background:linear-gradient(180deg,#78c6f2,#4198cd);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -3px 4px rgba(0,0,0,.18)}
-.pkey.sh .kt{background:linear-gradient(180deg,#ff97cf,#e0559f)}
-.pkey .kt .ico{width:17px;height:17px}.pkey .kt .ktx{font-size:6.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
-.pkey .kled{position:absolute;right:6px;top:6px;width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.18)}
-.pkey.red .kled{background:#ff3b3b;box-shadow:0 0 6px #ff3b3b}
+/* key tops match the module's keys (panel.css): cap, dish, thin LED line, white icon and name */
+.pkey .kt{left:0;top:0;width:58px;height:52px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding-top:5px;color:#fff;
+  background:linear-gradient(180deg,#5fb3e6,#3f93c9);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.pkey .kt::before{content:"";position:absolute;left:6px;right:6px;top:3px;bottom:7px;border-radius:5px;
+  background:radial-gradient(120% 90% at 50% 40%,#9fd6f5,#72bdea 70%,#62b0e0);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 3px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.2)}
+.pkey.sh .kt{background:linear-gradient(180deg,#ff86c8,#e0559f)}
+.pkey.sh .kt::before{background:radial-gradient(120% 90% at 50% 40%,#ffbfe2,#ff95cf 70%,#f784c2)}
+.pkey .kt>span{position:relative}
+.pkey .kt .ico{width:16px;height:16px}.pkey .kt .ktx{font-size:6.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.pkey .kt .lline{position:absolute;left:14px;right:14px;top:6px;height:2.5px;border-radius:2px;background:rgba(0,0,0,.28);z-index:1}
+.pkey.sh.pressed .lline{background:#e8e4d6;box-shadow:0 0 6px #fff}
+.pkey[data-w="r1"].pressed .lline,.pkey[data-w="r2"].pressed .lline{background:#fff;box-shadow:0 0 6px #fff,0 0 2px #fff}
+.pkey.pink .lline{background:#ff7ac6;box-shadow:0 0 6px #ff4fb0,0 0 2px #fff}
+.pkey.red .lline{background:#ff4b4b;box-shadow:0 0 7px #ff3b3b,0 0 2px #fff}
 /* dial */
 .pdial{width:150px;height:150px;cursor:grab;touch-action:none}
 .pdial .ring{left:0;top:0;width:150px;height:150px;border-radius:50%;transform:translateZ(10px);
@@ -55,10 +63,10 @@
 /* knobs and LED rings */
 .pknob{width:80px;height:80px;cursor:ns-resize;touch-action:none}
 .pknob svg{position:absolute;left:0;top:0;width:80px;height:80px;pointer-events:none}
-.pknob .skirt{left:13px;top:13px;width:54px;height:54px;border-radius:50%;transform:translateZ(4px);background:radial-gradient(circle,#8c9196 0 21px,#a9aeb3 22px,#7d8287 27px)}
-.pknob .cap{left:18px;top:18px;width:44px;height:44px;border-radius:50%;transform:translateZ(15px);
+.pknob .skirt{left:13px;top:13px;width:54px;height:54px;border-radius:50%;transform:translateZ(6px);background:radial-gradient(circle,#8c9196 0 21px,#a9aeb3 22px,#7d8287 27px)}
+.pknob .cap{left:18px;top:18px;width:44px;height:44px;border-radius:50%;transform:translateZ(26px);
   background:radial-gradient(circle at calc(50% - var(--lx)*16%) calc(50% - var(--ly)*16%),#fff,#dfe2e5 42%,#aeb3b8 100%)}
-.pknob .ptr{left:39px;top:20px;width:2px;height:14px;border-radius:1px;background:#1D2125;transform-origin:1px 20px;transform:translateZ(15.3px) rotate(var(--a))}
+.pknob .ptr{left:39px;top:20px;width:2px;height:14px;border-radius:1px;background:#1D2125;transform-origin:1px 20px;transform:translateZ(26.3px) rotate(var(--a))}
 /* 1/4-inch jacks */
 .pjack{width:40px;height:40px}
 .pjack .hex{left:2.68px;top:5px;width:34.64px;height:30px;transform:translateZ(3px);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);

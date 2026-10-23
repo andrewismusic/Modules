@@ -287,3 +287,6 @@
 .slab.s5{grid-template-columns:repeat(5,82px);justify-content:center;padding-right:0}
 .erow{height:auto;min-height:78px}
 .module.sp .slab{margin-bottom:0}.module.sp .mid{gap:0;padding-top:2px}.module.sp .erow{min-height:67px}
+/* Relay's Random keys: the light line turns white while held, and pink while their Save / Load screen is open */
+.key.rk.pressed .lline{background:#fff!important;opacity:1!important;box-shadow:0 0 8px #fff,0 0 2px #fff}
+.key.rk.pink .lline{background:#ff7ac6!important;opacity:1!important;box-shadow:0 0 7px #ff4fb0,0 0 2px #fff}
