@@ -56,3 +56,11 @@
 .module .jk.patched::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--pc);box-shadow:0 0 6px var(--pc);top:18px;left:50%;margin-left:-6px;pointer-events:none}
 .combos .combogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 24px;width:100%}
 .combos h4{margin:6px 0 4px;font-size:.9rem}.combos ul{margin:0;padding-left:18px;font-size:.9rem;line-height:1.45}
+/* rhythm generator step lights */
+.rsteps{display:inline-flex;gap:3px;flex-wrap:wrap;max-width:180px}
+.rsteps i{width:8px;height:8px;border-radius:50%;background:#3a3f45;display:inline-block}
+.rsteps i.h{background:#9aa0a5}
+.rsteps i.cur{outline:1px solid #fff;outline-offset:1px}
+.rsteps i.h.cur{background:#fff;box-shadow:0 0 6px #fff}
+/* modulation card titles: a dot in the cable color */
+.srct{display:inline-flex;align-items:center;gap:6px}.srct i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.35)}

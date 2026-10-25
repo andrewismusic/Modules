@@ -3,4 +3,6 @@ Random membership, ranges, Deviation (Window / Distinct) and Glide, CV assignmen
 Spec: docs/design-language.md.
 
 Contents: `params.js` (knob position ↔ value mapping, formatters), `tweens.js` (UI glides), `persist.js` (guarded
-localStorage). Relay's own key grammar and randomize rules are in `devices/relay/control/`.
+localStorage), `panel-keys.js` (Moment / Prism key grammar), `random-pick.js` (Random's Deviation window rule),
+`panel-descs.js` (encoder and button descriptors, Glide lists), `modulation.js` (test bench LFO, clocked S&H, rhythm
+generator). Relay's own key grammar and randomize rules are in `devices/relay/control/`.

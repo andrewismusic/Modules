@@ -3,4 +3,6 @@ round screen and fluid visualizer, the desktop pyramid renderer, test bench piec
 
 Contents: `knob.js`, `icons.js` (key icons, legends, jacks), `fluid-gl.js` (the WebGL2 fluid simulation),
 `test-sources.js` (generated drums, bells, acid bass and pad), and the stylesheets `panel.css`, `bench.css`,
-`pyramid.css`, all moved from the v30 prototype.
+`pyramid.css`, all moved from the v30 prototype; `panel-module.js` (the Moment / Prism panel: encoders with layers, lit
+buttons, keys, Random, CV assignment, settings mode) and `mod-bench.js` (bench LFO and rhythm generator cards and
+click-to-patch cables).

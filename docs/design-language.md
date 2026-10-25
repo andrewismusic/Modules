@@ -44,7 +44,8 @@ Bypass on any module: its Bypass key light turns red, all other lights dim; cont
   Glide (its own encoder, default 0) glides continuous changes: note values when clocked, otherwise ms.
 - Settings mode (Shift + Bypass held 3 s; same grammar as Relay's menu: Bypass = enter / keep and exit, Shift = back /
   cancel): only encoders that carry an option light, in white; left half lit = first choice, right half = second.
-  Turn to choose; tap to see the encoder's second-layer option. Options are global (shared by both modules):
+  Turn to choose (turning only picks the option; the parameter itself does not move); tap to see the encoder's
+  second-layer option. Options are global (shared by both modules):
   Glide encoder: Glide range short (2 bars / 7 s) or long (16 bars / 33 s). Deviation encoder: Window or Distinct.
   Prism only: Time encoder: Smear tails on Random (ring out / cut). Ring encoder: Ring tails (keep birth decay / follow
   knobs live). Ring tilt (Ring's second layer): Ring tails on Random (ring out / cut).
@@ -52,13 +53,15 @@ Bypass on any module: its Bypass key light turns red, all other lights dim; cont
 - CV 1–4 (green / periwinkle / coral / yellow): patching a jack opens assignment mode for 5 s; unassigned controls
   breathe in the jack color. Tap an encoder, button or key (Moment: Hold, Capture) to assign/unassign. Tap Bypass =
   clear this jack; tap Random = random assignments; long-press (0.8 s) Bypass or Random = assign that key. Each action
-  adds 5 s. CV adds ±50% of the throw (UI-only targets like Amount and Glide are offset at randomize time); on keys
+  adds 5 s; once the 5 s run out, these gestures go back to their usual meaning. CV adds ±50% of the throw (UI-only targets like Amount and Glide are offset at randomize time); on keys
   it is a gate (> 0.3). Assignments persist.
 
 ## Key grammar across devices (decided)
 - All keys on every device act on release, Relay included. (The v30 prototype still acts on press for Relay's keys;
   the Relay web demo acts on release.) A key used in a Shift combination does not also do its own action on release,
   and neither does Shift.
+- Exception, to be confirmed by the designer: Moment's Freeze key acts on press (it is played, and Shift + Freeze is
+  momentary, frozen while held). The prototype does the same.
 - Shift + Bypass opens Relay's menu as Bypass goes down: the one key action on press. The release that follows does
   nothing. Moment and Prism need it held 3 s to enter settings mode. This difference is intended: Relay has a screen.
 - The enter/back grammar (Bypass = enter, Shift = back) is the same in Relay's screens and in Moment/Prism settings.

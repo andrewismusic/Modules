@@ -11,6 +11,15 @@
 In the prototype these come from one implementation, `makePanelModule`. Keep them in `shared/control` and
 `shared/ui-web`.
 
+**Code:**
+- Engine: `engine/moment-engine.js` (the shared `shared/dsp/freezer.js`, bypass, soft clip, safety net) and
+  `engine/worklet.js`.
+- Controls: `control/moment-defs.js` (descriptors, layout, Random defaults, settings) and `control/freeze-key.js`.
+- Panel: `shared/ui-web/panel-module.js`, with the key grammar in `shared/control/panel-keys.js` and Random's choice
+  rule in `shared/control/random-pick.js`. Prism will use the same.
+- Demo: `web-demo/` (bench modulation from `shared/control/modulation.js` and `shared/ui-web/mod-bench.js`).
+- Checks: `tools/checks/moment-engine.test.js`, `moment-clicks.test.js`, `panel-control.test.js`, `modulation.test.js`.
+
 **Watch for:**
 - No spectral analysis in the main path: Moment adds essentially zero latency, and must keep that.
 - Thin applies only in Spectral mode and Direction only in Loop mode. They share one encoder as main and second layer.

@@ -1,0 +1,5 @@
+/* Moment demo page: one module, centred under the bench. */
+.rack{justify-content:center}
+@media (max-width:899px){.rack{align-items:center}}
+.benchgrid{margin-bottom:12px}
+.module .jk#jkClock{cursor:pointer}

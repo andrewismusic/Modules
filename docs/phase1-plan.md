@@ -13,6 +13,14 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
   Licence), with a system condensed fallback.
 - **Checkpoint.** Stop after the Relay demo for a listening review before Moment and Prism.
 
+## Decisions taken with the designer (2026-10-25)
+- **Relay review passed.** Move on: Moment next, then Prism.
+- **Moment demo page.** Same layout as Relay's: bench at the top, the module, the combinations card at the bottom. No
+  desktop version.
+- **Moment demo modulation.** One LFO with a clocked sample-and-hold mode, and a rhythm generator that sends triggers,
+  patchable to CV 1–4, Freeze and Random. The master clock drives the Clock jack.
+- **Relay save slots: 100** (instead of 64). Saved for later; not built yet.
+
 ## Build setup
 - One root `package.json`. Vite with `vite-plugin-singlefile` builds each `devices/<device>/web-demo/` into one HTML
   file. Vitest runs the behaviour checks in `tools/`.
@@ -25,11 +33,12 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
 ## Module split
 | Folder | Contents |
 |---|---|
-| `shared/dsp/` | FFT, Stft, SpecPitch, quantize snap, Biquad, the Relay effects (incl. Smear, Thin, Ring, Shuffler), OTT |
-| `shared/control/` | Key handling, persistence, tweens and glide |
-| `shared/ui-web/` | Knob with LED ring, keys, fader, dial with round screen, fluid visualizer (WebGL2 + 2D fallback), pyramid renderer, bench pieces, generated sources |
+| `shared/dsp/` | FFT, Stft, SpecPitch, quantize snap, Biquad, the Relay effects (incl. Smear, Thin, Ring, Shuffler), OTT, Moment's freezer |
+| `shared/control/` | Key handling (Moment / Prism grammar), Random's rule, control descriptors, bench modulation, persistence, tweens and glide |
+| `shared/ui-web/` | Knob with LED ring, keys, fader, dial with round screen, fluid visualizer (WebGL2 + 2D fallback), pyramid renderer, Moment / Prism panel module, bench pieces (incl. modulation and cables), generated sources |
 | `shared/design/` | Colour, size and label tokens as CSS variables; embedded font |
 | `devices/relay/` | Relay engine (slots, mix, OTT, bypass, limiter, safety net) and worklet entry, Relay control (randomize and range rules, dial, screen menu, save/load, CV menu), `web-demo/` |
+| `devices/moment/` | Moment engine (freezer, bypass, safety net) and worklet entry, Moment controls and Freeze key, `web-demo/` |
 | `tools/` | Behaviour checks |
 
 ## Behaviour checks
@@ -48,7 +57,10 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
 4. ~~Keys act on release (menu on Bypass down); update the spec and the combinations card.~~ Done.
 5. ~~Click detector, measurements, single-file build.~~ Done: `devices/relay/web-demo/relay.html`. **Waiting on the
    designer's listening review.**
-6. Moment and Prism, after the review.
+6. ~~Moment demo.~~ Done: `devices/moment/web-demo/moment.html`, with the shared panel module Prism will reuse.
+   **Waiting on the designer's review.**
+7. Prism.
+8. Relay: 100 save slots (designer, 2026-10-25).
 
 ## Notes from building the Relay demo
 - **Worklet loading.** Pages opened straight from disk (`file://`) refuse Blob-URL worklets in Chromium; the demo then
@@ -62,3 +74,17 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
 - **Review round 1 (2026-10-23).** Bench moved to the top; keyboard Z/X/C/V; Random keys light white when held and pink
   in Save / Load; chunkier pyramid keys (module key tops) and knobs; no fader label on the pyramid; Ring tilt's
   pitch-moved harmonics switched off in Relay's Thin (kept for Prism).
+
+## Notes from building the Moment demo
+- **Shared code.** The panel (encoders, keys, Random, CV assignment, settings) is in `shared/ui-web/panel-module.js`;
+  its key grammar and Random rule are plain logic in `shared/control/` with their own checks, ready for Prism.
+- **Clicks found and fixed (measured with the Relay click metric, 220 Hz sine, frozen).** Turning Direction while a
+  loop played could flip a pass mid-way and jump to the other end of the loop: 2315×, now 2.3×. Each pass's direction
+  is now chosen just before it starts. Dry/wet was applied unsmoothed (CV and stepped LFOs would step it); now smoothed
+  over 10 ms. Every other move measured 1–7× (still: 1.0–1.2×).
+- **Other fixes to prototype behaviour.** In settings mode, turning an encoder chose the option and then went on to
+  move the parameter as well; now it only chooses. A CV-assignment gesture could fire after the 5 s window closed
+  while the key was held; it now does nothing.
+- **Open question for the designer.** Freeze acts on press (prototype behaviour; needed for Shift + Freeze momentary),
+  while the design language says every key acts on release.
+

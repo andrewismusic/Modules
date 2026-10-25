@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "dev:relay": "vite devices/relay/web-demo",
+    "dev:moment": "vite devices/moment/web-demo",
     "build:relay": "vite build devices/relay/web-demo && cp devices/relay/web-demo/dist/index.html devices/relay/web-demo/relay.html",
+    "build:moment": "vite build devices/moment/web-demo && cp devices/moment/web-demo/dist/index.html devices/moment/web-demo/moment.html",
     "test": "vitest run"
   },
   "devDependencies": {
