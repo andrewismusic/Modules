@@ -1,11 +1,11 @@
 // The demo's test bench (not hardware): play / stop, sources, volume, master clock, modulation (LFO with clocked S&H,
-// rhythm generator) with cables to Moment's CV 1–4, Freeze and Random jacks, and reset.
+// rhythm generator) with cables to Moment's CV 1–3, Freeze and Random jacks, and reset.
 import { makeKnob } from '../../../../shared/ui-web/knob.js';
 import { buildModBench } from '../../../../shared/ui-web/mod-bench.js';
 import { pct } from '../../../../shared/control/params.js';
 import { state, saveState, resetState } from './state.js';
 import { ensureAudio, startSource, stopSource, tempoSettled, setVolume, send, beatPos } from './audio.js';
-import { MOM, read, freezeTrigger } from './moment-ui.js';
+import { MOM, FR, read, freezeJack, holdUp } from './moment-ui.js';
 
 const $=s=>document.querySelector(s);
 let clkK=null,volK=null;
@@ -21,7 +21,7 @@ function clockChanged(){MOM.cfg.preSync(MOM);MOM.refresh();}
 /* the module jacks the bench can patch, found by their printed names */
 function benchPorts(){const ports={},mod=$('#modFr');
   mod.querySelectorAll('.jk').forEach(el=>{const l=(el.dataset.cv?'CV '+{A:1,B:2,C:3,D:4}[el.dataset.cv]:el.querySelector('.lg')?.textContent||'').trim();
-    if(['CV 1','CV 2','CV 3','CV 4','Freeze','Random'].includes(l))ports[l]={el,name:'Moment '+l};});
+    if(['CV 1','CV 2','CV 3','Freeze','Random'].includes(l))ports[l]={el,name:'Moment '+l};});
   return ports;}
 const cvLetter=p=>{const m=/^CV (\d)$/.exec(p);return m?'ABCD'[+m[1]-1]:null;};
 
@@ -36,7 +36,7 @@ export function buildBench(onReset){
   $('#clkFr').onclick=toggleClock;$('#jkClock').classList.add('pport');$('#jkClock').addEventListener('click',toggleClock);
   mod=buildModBench({box:$('#lfoBox'),list:$('#patchList'),hint:$('#patchHint'),bench:state.bench,ports:benchPorts(),beat:beatPos,changed:saveState,
     onConnect:p=>{ensureAudio();const L=cvLetter(p);if(L)MOM.cvPatch(L,true);},
-    onUnplug:p=>{const L=cvLetter(p);if(L)MOM.cvPatch(L,false);}});
+    onUnplug:p=>{const L=cvLetter(p);if(L)MOM.cvPatch(L,false);if(p==='Freeze'&&FR().mom)holdUp();}});
   /* restore saved cables (without opening assignment mode) */
   for(const p of Object.keys(state.bench.patches)){const L=cvLetter(p);if(L)MOM.cv[L].p=true;}
   $('#resetState').onclick=()=>{for(const p of Object.keys(state.bench.patches)){const L=cvLetter(p);if(L)MOM.cvPatch(L,false);}resetState();onReset();};
@@ -45,5 +45,7 @@ export function buildBench(onReset){
 export function benchFrame(now){
   const res=mod.tick(now);
   for(const[p,{v,trig}]of Object.entries(res)){const L=cvLetter(p);
-    if(L)MOM.cvSet(L,v);else if(p==='Freeze'&&trig)freezeTrigger();else if(p==='Random'&&trig)MOM.randomize();}
+    if(L)MOM.cvSet(L,v);else if(p==='Random'&&trig)MOM.randomize();
+    /* Freeze follows the Latch / Mom switch: in Mom it is a gate (frozen while the input is high) */
+    else if(p==='Freeze'){if(FR().mom)freezeJack(v>0.3,false);else if(trig)freezeJack(true,true);}}
 }

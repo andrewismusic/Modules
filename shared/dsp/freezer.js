@@ -24,22 +24,29 @@ export class Freezer{
     this.S=[];for(let i=0;i<4;i++)this.S.push({lb:[new Float32Array(this.C),new Float32Array(this.C)],mag:[new Float32Array(nb),new Float32Array(nb)],T:0,g:0,tg:0,rate:1,dz:[this.mkDz(),this.mkDz()]});
     this.newest=0;
     this.R2=[this.mkR(),this.mkR()];this.rc=0;this.rx=1;this.rxInc=1/(0.008*sr);this.warm=false;
-    this.L=this.calcL();this.Lp=this.L;this.lx=1;this.lxInc=1/(0.015*sr);this.pendL=0;
+    this.posMs=0;this.posBeats=0;this.off=0;this.offp=0;this.magDirty=false;
+    this.L=this.calcL();this.Lp=this.L;this.lx=1;this.lxInc=1/(0.015*sr);this.pend=false;this.pendL=0;this.pendO=0;
+    /* Tone: a tilt EQ on the frozen sound (both modes) pivoting near 700 Hz, up to ±9 dB at each end, smoothed */
+    this.tone=0;this.tns=0;this.tlp=[0,0];this.tgL=1;this.tgH=1;this.tcnt=0;this.tc=1-Math.exp(-2*Math.PI*700/sr);
     this.oL=0;this.oR=0;this.sl=0;this.sr_=0;this.ll=0;this.lr=0;
     /* Dry/wet is smoothed (10 ms) so CV and Random glides that step it never click */
     this.ws=1;this.wk=1-Math.exp(-1/(0.01*sr));
   }
   /* per-pass direction state for one loop length: the pass now playing (reversed? faded in?) and the one after it */
   mkDz(){return{pass:-1,rev:0,fin:0,npass:-1,nrev:0};}
-  swapL(L){this.Lp=this.L;this.L=L;this.lx=0;for(const s of this.S){s.dz[1]=s.dz[0];s.dz[0]=this.mkDz();}}
+  /* a new loop length or Position: the previous reading (Lp, offp) crossfades into the new one over 15 ms */
+  swap(L,O){if(O!==this.off)this.magDirty=true;this.Lp=this.L;this.offp=this.off;this.L=L;this.off=O;this.lx=0;for(const s of this.S){s.dz[1]=s.dz[0];s.dz[0]=this.mkDz();}}
   mkR(){return{acc:[new Float32Array(this.N),new Float32Array(this.N)],hp:0};}
   Fof(L){return Math.max(2,Math.min(Math.round(0.012*this.sr),Math.floor(L/3)));}
   calcL(){const L=Math.round((this.free?this.loopMs/1000:this.loopBeats*60/this.bpm)*this.sr);return Math.max(16,Math.min(L,Math.floor((this.C-this.Fof(L)-4)/2)));}
-  updL(){const L=this.calcL();if(this.lx>=1){if(L!==this.L)this.swapL(L);}else this.pendL=L;}
+  /* Position: how far back in the captured audio the freeze reads, in samples (up to 5 s; limited per capture to what it holds) */
+  calcO(){const o=Math.round((this.free?this.posMs/1000:this.posBeats*60/this.bpm)*this.sr);return Math.max(0,Math.min(o,Math.round(5*this.sr)));}
+  updL(){const L=this.calcL(),O=this.calcO();if(this.lx>=1){if(L!==this.L||O!==this.off)this.swap(L,O);}else{this.pend=true;this.pendL=L;this.pendO=O;}}
   fadeSec(){if(this.free)return Math.max(0.008,this.fadeMs/1000);return this.fadeBeats>0?this.fadeBeats*60/this.bpm:0.008;}
   set(on){this.user=on;this.update();}
   update(){
-    const on=this.user||!!this.rolling;
+    /* Rolling never freezes by itself: it only changes what an active freeze does */
+    const on=this.user;
     if(on&&!this.on){
       if(this.eng<=0){for(const s of this.S){s.g=0;s.tg=0;}this.grab(0);this.S[this.newest].g=1;this.prefill(this.R2[this.rc],null);this.rx=1;this.warm=true;}
       else this.grab(0.008);
@@ -55,24 +62,31 @@ export class Freezer{
   grab(fade){
     let best=0,bs=9;
     for(let i=0;i<4;i++){const o=this.S[i];if(i===this.newest&&o.g>0)continue;const sc=o.g+(o.tg>0?2:0);if(sc<bs){bs=sc;best=i;}}
-    const s=this.S[best],N=this.N,H=this.H,m=this.mask,re=this.re,im=this.im,win=this.win;
-    for(let c=0;c<2;c++){
-      this.copyRing(s.lb[c],c);
-      const mg=s.mag[c],rg=this.ring[c];mg.fill(0);
-      for(let f=0;f<4;f++){
-        const st=this.w-N-f*H;
-        for(let i=0;i<N;i++){re[i]=rg[(st+i)&m]*win[i];im[i]=0;}
-        this.fft.run(re,im,false);
-        for(let k=0;k<=N/2;k++)mg[k]+=re[k]*re[k]+im[k]*im[k];
-      }
-      for(let k=0;k<=N/2;k++)mg[k]=Math.sqrt(mg[k]/4);
-    }
+    const s=this.S[best];
+    for(let c=0;c<2;c++)this.copyRing(s.lb[c],c);
+    this.specMag(s);
     s.T=this.clock;s.dz=[this.mkDz(),this.mkDz()];
     const rate=1/Math.max(1,fade*this.sr);
     for(const o of this.S){o.tg=0;o.rate=rate;}
     s.g=0;s.tg=1;this.newest=best;
     if(fade<=0.0081&&this.mm<1&&this.eng>0){const nr=1-this.rc;this.prefill(this.R2[nr],s);this.rc=nr;this.rx=0;}
   }
+  /* a capture's spectrum: the average of four frames ending Position samples before the capture time */
+  specMag(s){
+    const N=this.N,H=this.H,re=this.re,im=this.im,win=this.win,o=Math.min(this.off,this.C-N-3*H-1);
+    for(let c=0;c<2;c++){
+      const mg=s.mag[c],b=s.lb[c];mg.fill(0);
+      for(let f=0;f<4;f++){
+        const st=this.C-o-N-f*H;
+        for(let i=0;i<N;i++){re[i]=b[st+i]*win[i];im[i]=0;}
+        this.fft.run(re,im,false);
+        for(let k=0;k<=N/2;k++)mg[k]+=re[k]*re[k]+im[k]*im[k];
+      }
+      for(let k=0;k<=N/2;k++)mg[k]=Math.sqrt(mg[k]/4);
+    }
+  }
+  /* Position moved: re-measure the sounding captures at the next spectral frame (the overlap-add blends old and new) */
+  remag(){this.magDirty=false;for(const s of this.S)if(s.g>0||s.tg>0)this.specMag(s);}
   combine(c,only){
     const nb=this.nb,pm=this.pm;
     if(only){pm.set(only.mag[c]);return pm;}
@@ -102,6 +116,7 @@ export class Freezer{
     return e;
   }
   synth(r,only){
+    if(this.magDirty)this.remag();
     const N=this.N,H=this.H,re=this.re,im=this.im,win=this.win,g=4/3;
     const sp=1-(1-this.spread)*(1-this.spread),mgs=[0,1].map(c=>Float32Array.from(this.shape(this.combine(c,only))));
     if(sp>0.001){const nb=this.nb,t=this.sTab;for(let k=0;k<nb;k++){const mid=(mgs[0][k]+mgs[1][k])*0.5,p=t[k];mgs[0][k]=mgs[0][k]*(1-sp)+mid*sp*Math.sqrt(1+p);mgs[1][k]=mgs[1][k]*(1-sp)+mid*sp*Math.sqrt(1-p);}}
@@ -131,7 +146,7 @@ export class Freezer{
      Into a forward pass the loop joins seamlessly (the end crossfades into the audio just before the loop start);
      into a reverse pass the current pass fades out and the reverse one fades in. w: 0 = current length, 1 = previous. */
   vs(s,L,c,w){
-    const F=this.Fof(L),T=s.T,g0=this.free?T-L:Math.floor(T/L)*L-L,base=this.C-(T-g0),q=this.clock-g0,pass=Math.floor(q/L),p=q-pass*L,b=s.lb[c],D=s.dz[w];
+    const F=this.Fof(L),T=s.T,g0=this.free?T-L:Math.floor(T/L)*L-L,base0=this.C-(T-g0),base=base0-Math.max(0,Math.min(w?this.offp:this.off,base0-F-1)),q=this.clock-g0,pass=Math.floor(q/L),p=q-pass*L,b=s.lb[c],D=s.dz[w];
     if(c===0){
       if(D.pass!==pass){if(D.npass===pass){D.rev=D.nrev;D.fin=D.nrev;}else{D.rev=0;D.fin=0;}D.pass=pass;}
       if(p>=L-F&&D.npass!==pass+1){const h=Math.sin((pass+1)*12.9898+T*0.0007+L*0.013)*43758.5453,rnd=h-Math.floor(h);D.npass=pass+1;D.nrev=this.dir<0.999&&rnd>=this.dir?1:0;}
@@ -166,17 +181,17 @@ export class Freezer{
     this.ll=sl;this.lr=sr;
   }
   tick(l,r){
-    if(!this.rolling&&!this.user&&this.on)this.update();
+    if(!this.user&&this.on)this.update();
     const w=this.w;this.ring[0][w]=l;this.ring[1][w]=r;this.w=(w+1)&this.mask;
     if(this.on){if(this.eng<1)this.eng=Math.min(1,this.eng+this.inc);}
     else if(this.eng>0)this.eng=Math.max(0,this.eng-this.inc);
     for(const s of this.S){if(s.g!==s.tg){if(s.g<s.tg)s.g=Math.min(s.tg,s.g+s.rate);else s.g=Math.max(s.tg,s.g-s.rate);}}
-    if(this.lx<1){this.lx+=this.lxInc;if(this.lx>=1){this.lx=1;if(this.pendL){const L=this.pendL;this.pendL=0;if(L!==this.L)this.swapL(L);}}}
+    if(this.lx<1){this.lx+=this.lxInc;if(this.lx>=1){this.lx=1;if(this.pend){this.pend=false;if(this.pendL!==this.L||this.pendO!==this.off)this.swap(this.pendL,this.pendO);}}}
     if(this.ws!==this.wet){this.ws+=(this.wet-this.ws)*this.wk;if(Math.abs(this.ws-this.wet)<1e-5)this.ws=this.wet;}
     const mt=this.mode?1:0;if(this.mm!==mt)this.mm=mt>this.mm?Math.min(1,this.mm+this.mmInc):Math.max(0,this.mm-this.mmInc);
     if(this.eng<=0){this.oL=l;this.oR=r;return;}
-    /* rolling: while nothing is held or latched, grab fresh audio at every loop boundary */
-    if(this.rolling&&!this.user){
+    /* Rolling: while frozen, grab fresh audio at every loop boundary */
+    if(this.rolling&&this.user){
       const L=this.L,due=this.free?(++this.rcnt>=L):(this.clock%L===0);
       if(due){this.rcnt=0;this.grab(Math.max(0.008,Math.min(this.fadeSec(),L/this.sr*0.5)));}
     }
@@ -188,6 +203,11 @@ export class Freezer{
       if(this.mm>=1){fl=this.ll;fr=this.lr;}
       else{const x=this.mm*1.5707963,c=Math.cos(x),s=Math.sin(x);fl=fl*c+this.ll*s;fr=fr*c+this.lr*s;}
     }
+    /* Tone: the low band (one-pole) and the rest are weighted against each other; the filter always runs so moving
+       Tone away from 0 never starts from a stale state */
+    {const c=this.tc,a=this.tlp;a[0]+=(fl-a[0])*c;a[1]+=(fr-a[1])*c;
+      if(this.tns!==this.tone){this.tns+=(this.tone-this.tns)*this.wk;if(Math.abs(this.tns-this.tone)<1e-5)this.tns=this.tone;}
+      if(this.tns!==0){if((this.tcnt++&15)===0){const g=Math.pow(2,1.5*this.tns);this.tgH=g;this.tgL=1/g;}fl=a[0]*this.tgL+(fl-a[0])*this.tgH;fr=a[1]*this.tgL+(fr-a[1])*this.tgH;}}
     const bb=this.eng*this.ws*1.5707963,ca=Math.cos(bb),sb=Math.sin(bb);
     this.oL=l*ca+fl*sb;this.oR=r*ca+fr*sb;
   }

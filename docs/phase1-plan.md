@@ -21,6 +21,13 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
   patchable to CV 1–4, Freeze and Random. The master clock drives the Clock jack.
 - **Relay save slots: 100** (instead of 64). Saved for later; not built yet.
 
+## Decisions taken with the designer (2026-10-28)
+- **Moment review.** Fewer combinations: no Deviation, Initialize, shuffle or assignment reset; Random + Bypass = all
+  ranges full; Shift + Bypass = settings at once; Freeze acts on press (confirmed). Random ranges are relative to the
+  hand-set value, unipolar or bipolar per parameter (the only setting). Membership breathes. Latch / Mom and Man / Roll
+  switches (CV 4 removed); Rolling is a property of the freeze. New layout with Direction / Thin following the mode,
+  Tone (both modes), Position (live), Random glide above the Random key. Full list in `docs/decisions.md`.
+
 ## Build setup
 - One root `package.json`. Vite with `vite-plugin-singlefile` builds each `devices/<device>/web-demo/` into one HTML
   file. Vitest runs the behaviour checks in `tools/`.
@@ -59,7 +66,8 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
    designer's listening review.**
 6. ~~Moment demo.~~ Done: `devices/moment/web-demo/moment.html`, with the shared panel module Prism will reuse.
    **Waiting on the designer's review.**
-7. Prism.
+   ~~Moment review round 1 (2026-10-28).~~ Done. **Waiting on the designer's review.**
+7. Prism (revisit its layout and settings against the new shared grammar first; see `devices/prism/SPEC.md`).
 8. Relay: 100 save slots (designer, 2026-10-25).
 
 ## Notes from building the Relay demo
@@ -87,4 +95,9 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
   while the key was held; it now does nothing.
 - **Open question for the designer.** Freeze acts on press (prototype behaviour; needed for Shift + Freeze momentary),
   while the design language says every key acts on release.
+- **Moment review round 1 (2026-10-28).** Built as decided. Rolling no longer freezes by itself (engine change in
+  `shared/dsp/freezer.js`). Position re-reads the capture: loops crossfade over 15 ms to each new place (a frame-rate
+  sweep measured 1.8×, still 1.4×), the spectral freeze re-measures at the next frame (1.0×). Tone is a tilt EQ after
+  the freeze (1.6–1.7×). The shared panel's ranges, settings page and breathing are in `shared/ui-web/panel-module.js`
+  and `shared/control/random-pick.js`. The audio checks now run with a 60 s per-test limit (`vitest.config.js`).
 

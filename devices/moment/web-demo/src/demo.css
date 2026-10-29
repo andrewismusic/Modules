@@ -3,3 +3,13 @@
 @media (max-width:899px){.rack{align-items:center}}
 .benchgrid{margin-bottom:12px}
 .module .jk#jkClock{cursor:pointer}
+/* panel print: the mode colors and Random's amber */
+.module .lg .lc-spec{color:#8a5be0}.module .lg .lc-loop{color:#11977f}.module .lg .lc-rnd{color:#d0821a}
+.module .lg.lab .s2.lc-spec{color:#8a5be0}.module .lg.lab .s2.lc-rnd{color:#d0821a}
+.plines{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.plines line{stroke-width:1.4;stroke-linecap:round}.plines .pl-mode{stroke:#8f959b}.plines .pl-rnd{stroke:#e39a3a}
+/* the Latch / Mom and Man / Roll switches in the jack area */
+.module .jg .tgc{display:flex;flex-direction:column;align-items:center;gap:3px}
+.module .jg .tog{width:16px;height:30px;background:radial-gradient(circle at 50% 50%,#c9ccc6 0 5px,#8e928c 5.5px,#1b1d20 6.5px)}
+.module .jg .tog::after{width:9px;height:13px;margin-left:-4.5px;top:2px}
+.module .jg .tog[aria-checked="true"]::after{top:15px}

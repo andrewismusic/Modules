@@ -90,3 +90,72 @@ describe('Moment freeze', () => {
     expect(err).toBeLessThan(1e-6);
   });
 });
+
+/* level of frequency f in x (Goertzel) */
+const tone = (x, f, a = 0, b = x.length) => { const w = 2 * Math.PI * f / SR, c = 2 * Math.cos(w); let s1 = 0, s2 = 0;
+  for (let i = a; i < b; i++) { const s0 = x[i] + c * s1 - s2; s2 = s1; s1 = s0; } return Math.sqrt(s1 * s1 + s2 * s2 - c * s1 * s2) / (b - a); };
+
+describe('Moment Rolling', () => {
+  it('Rolling on its own never freezes', () => {
+    const p = moment({ mode: 1, rolling: 1, free: true, loopMs: 200 });
+    run(p, 300, sine(330));
+    const { L } = run(p, 100, () => [0, 0]);
+    expect(rms(L)).toBe(0);
+  });
+  it('frozen in Rolling re-captures every loop; frozen in Manual holds the first capture', () => {
+    for (const rolling of [0, 1]) {
+      const p = moment({ mode: 1, free: true, loopMs: 200, rolling });
+      run(p, 300, sine(330)); send(p, { type: 'freeze', v: true }); run(p, 100, sine(330));
+      const { L } = run(p, 600, sine(880)); // the input changes while frozen
+      const a = 400 * 128, b = 600 * 128;
+      if (rolling) expect(tone(L, 880, a, b)).toBeGreaterThan(5 * tone(L, 330, a, b));
+      else expect(tone(L, 330, a, b)).toBeGreaterThan(5 * tone(L, 880, a, b));
+    }
+  });
+  it('switching an active freeze to Rolling starts re-capturing; back to Manual keeps the freeze', () => {
+    const p = moment({ mode: 1, free: true, loopMs: 200 });
+    run(p, 300, sine(330)); send(p, { type: 'freeze', v: true }); run(p, 100, sine(330));
+    send(p, { type: 'fz', k: 'rolling', v: 1 });
+    let { L } = run(p, 400, sine(880));
+    expect(tone(L, 880, 200 * 128, 400 * 128)).toBeGreaterThan(5 * tone(L, 330, 200 * 128, 400 * 128));
+    send(p, { type: 'fz', k: 'rolling', v: 0 });
+    ({ L } = run(p, 400, () => [0, 0]));
+    expect(rms(L, 100 * 128)).toBeGreaterThan(0.05);
+  });
+});
+
+describe('Moment Position', () => {
+  it('loop mode: the loop plays the audio from Position earlier (a 1/8 loop, Position 1 beat back)', () => {
+    const P = 12000, O = 24000, inL = [];
+    const p = moment({ mode: 1, free: false, loopBeats: 0.5, posBeats: 1 }), n = noise(11);
+    send(p, { type: 'bpm', v: 120 });
+    run(p, 600, i => { const v = n(); inL[i] = v; return [v, v]; });
+    const T = 600 * 128; send(p, { type: 'freeze', v: true });
+    const { L } = run(p, 400, () => [0, 0]);
+    const g0 = Math.floor(T / P) * P - P;
+    let err = 0;
+    for (let i = 2000; i < L.length; i++) { const t = T + i, ph = (t - g0) % P; if (ph < 800 || ph > P - 800) continue; err = Math.max(err, Math.abs(L[i] - Math.fround(inL[g0 - O + ph + 1]))); } // the capture is one sample behind the clock count
+    expect(err).toBeLessThan(1e-6);
+  });
+  it('spectral mode: Position chooses which moment the spectrum comes from, live', () => {
+    const p = moment({ mode: 0, free: true, loopMs: 300 });
+    run(p, 400, sine(330)); run(p, 400, sine(880)); // 330 Hz until 3.4 s before the freeze... then 880 Hz
+    send(p, { type: 'freeze', v: true });
+    let { L } = run(p, 200, () => [0, 0]);
+    expect(tone(L, 880, 100 * 128)).toBeGreaterThan(5 * tone(L, 330, 100 * 128));
+    send(p, { type: 'fz', k: 'posMs', v: 1500 }); // 1.5 s back: inside the 330 Hz part
+    ({ L } = run(p, 200, () => [0, 0]));
+    expect(tone(L, 330, 100 * 128)).toBeGreaterThan(5 * tone(L, 880, 100 * 128));
+  });
+});
+
+describe('Moment Tone', () => {
+  it('tilts the frozen sound: clockwise brighter, counter-clockwise darker', () => {
+    const lv = t => { const p = moment({ mode: 1, free: true, loopMs: 300, tone: t });
+      run(p, 300, i => { const v = 0.2 * (Math.sin(2 * Math.PI * 110 * i / SR) + Math.sin(2 * Math.PI * 5000 * i / SR)); return [v, v]; });
+      send(p, { type: 'freeze', v: true }); const { L } = run(p, 300, () => [0, 0]); return tone(L, 5000, 100 * 128) / tone(L, 110, 100 * 128); };
+    const flat = lv(0), bright = lv(1), dark = lv(-1);
+    expect(bright / flat).toBeGreaterThan(4); expect(flat / dark).toBeGreaterThan(4);
+  });
+});
+

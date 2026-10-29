@@ -5,7 +5,7 @@
 **Shared with Prism:**
 - the panel frame and jack grid;
 - the encoder and key scheme;
-- Random, Deviation and Glide;
+- Random (ranges around the hand-set value) and Random glide;
 - CV assignment and settings mode.
 
 In the prototype these come from one implementation, `makePanelModule`. Keep them in `shared/control` and
@@ -19,8 +19,11 @@ In the prototype these come from one implementation, `makePanelModule`. Keep the
   rule in `shared/control/random-pick.js`. Prism will use the same.
 - Demo: `web-demo/` (bench modulation from `shared/control/modulation.js` and `shared/ui-web/mod-bench.js`).
 - Checks: `tools/checks/moment-engine.test.js`, `moment-clicks.test.js`, `panel-control.test.js`, `modulation.test.js`.
+- Controls no longer include Deviation or settings options; `shared/control/panel-descs.js` keeps the Glide list.
 
 **Watch for:**
 - No spectral analysis in the main path: Moment adds essentially zero latency, and must keep that.
-- Thin applies only in Spectral mode and Direction only in Loop mode. They share one encoder as main and second layer.
+- Thin applies only in Spectral mode and Direction only in Loop mode. They share one encoder that follows the mode.
+- Rolling is a property of the freeze: it never starts or stops one.
+- Position re-reads each capture live; keep its moves crossfaded (loops) or frame-aligned (spectral).
 - A Moment plugin is the first plugin candidate. It mirrors the module only.

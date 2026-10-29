@@ -290,3 +290,25 @@
 /* Relay's Random keys: the light line turns white while held, and pink while their Save / Load screen is open */
 .key.rk.pressed .lline{background:#fff!important;opacity:1!important;box-shadow:0 0 8px #fff,0 0 2px #fff}
 .key.rk.pink .lline{background:#ff7ac6!important;opacity:1!important;box-shadow:0 0 7px #ff4fb0,0 0 2px #fff}
+
+/* ---- 2026-10 review: random ranges around the hand-set value, the settings page, membership breathing ---- */
+/* range view (Random held, or the settings page): the hand-set (or noon) LED keeps the parameter's color, the range
+   is amber */
+.knob.rng .led.on.hm{fill:var(--kc)!important;filter:drop-shadow(0 0 2px var(--kc))!important}
+.knob.rng.sec .led.on.hm{fill:#ff8fcf!important;filter:drop-shadow(0 0 2px #ff8fcf)!important}
+.knob.rng.colored .led.on.hm{fill:var(--sc)!important;filter:drop-shadow(0 0 2px var(--sc))!important}
+.module.setmode .knob .led.on:not(.hm){fill:#ffb347!important;filter:drop-shadow(0 0 2.5px #ffb347)!important}
+.module.setmode .lbtn,.module.setmode .key:not(.sh):not(.byp){opacity:.4}
+/* a parameter included in Random: its lit LEDs breathe slowly between their color and amber (assignment mode, Random held and the
+   settings page take over) */
+@property --brc{syntax:'<color>';inherits:true;initial-value:#9fe7ff}
+.knob.mem{--rc:var(--kc,#9fe7ff)}.knob.mem.sec{--rc:#ff8fcf}.knob.mem.colored{--rc:var(--sc)}
+.module:not(.rndheld):not(.setmode):not(.asgmode):not(.blinkall) .knob.mem .led.on{fill:var(--brc)!important;filter:drop-shadow(0 0 2px var(--brc))!important;animation:membr 3.2s ease-in-out infinite alternate}
+@keyframes membr{from{--brc:var(--rc)}to{--brc:#ffb347}}
+.module:not(.rndheld):not(.setmode):not(.asgmode) .lbtn.rmem{animation:lbr 3.2s ease-in-out infinite alternate}
+@keyframes lbr{to{box-shadow:0 0 0 4px #D3D6D1,0 0 0 5px #9A9E99,0 0 16px #ffb347,0 2px 4px rgba(0,0,0,.35)}}
+/* Freeze light: pulsing when the freeze is Rolling; breathing toward amber when Random may change the freeze */
+.key.lit.rollp .lline{animation:roll 1s ease-in-out infinite alternate}
+.module:not(.rndheld) .key.lit.rmem .lline{animation:kbr 3.2s ease-in-out infinite alternate}
+@keyframes kbr{to{background:#ffb347;box-shadow:0 0 6px #ffb347}}
+@media (prefers-reduced-motion:reduce){.knob.mem .led.on,.lbtn.rmem,.key.lit.rollp .lline,.key.lit.rmem .lline{animation:none!important}}

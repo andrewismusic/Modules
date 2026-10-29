@@ -2,6 +2,12 @@
 
 # Prism: spec
 
+> **To revisit before building Prism (2026-10-28).** The shared grammar changed with Moment's review
+> (`docs/design-language.md`): there is no Deviation encoder any more, settings open with Shift + Bypass and hold each
+> parameter's range type, and Glide reaches 8 bars / 16 s with no range setting. Prism's layout below still has a
+> Deviation encoder, and Prism's own settings (Smear tails on Random, Ring tails, Ring tails on Random) need a new
+> place on the settings page. Decide both with the designer when Prism is built.
+
 ## PRISM (spectral processor, 20HP) — latency = analysis size (dry path is never delayed, so in parallel it acts
 ## as pre-delay). At minimum settings it is bit-transparent apart from that delay (measured about −148 dB).
 - Jacks: In L/R, Out L/R; CV 1–4, Random. Keys: Shift, Order (Shift: Res), Random, Bypass. (A trigger /

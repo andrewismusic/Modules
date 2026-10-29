@@ -8,7 +8,7 @@ import { JSVG, KL, LL, ICON_FREEZE, ICON_DICE, ICON_BYP } from '../../../../shar
 import { runTweens, tweens } from '../../../../shared/control/tweens.js';
 import { state, loadState, saveState } from './state.js';
 import { audioHooks, updateLatency } from './audio.js';
-import { MOM, freezeDown, freezeUp, clearAllKeys, syncAll } from './moment-ui.js';
+import { MOM, freezeDown, freezeUp, clearAllKeys, syncAll, buildSwitches, refreshSwitches } from './moment-ui.js';
 import { buildBench, benchFrame, togglePlay, updatePlay, selectSource, refreshClock, mod } from './bench.js';
 
 const $=s=>document.querySelector(s);
@@ -17,7 +17,7 @@ const $=s=>document.querySelector(s);
 document.querySelectorAll('[data-jack]').forEach(el=>{const[l,k]=el.dataset.jack.split('|');el.outerHTML=`<div class="jk ${k||''}"${l==='Clock'?' id="jkClock"':''}><span class="lg">${l}</span>${JSVG(k==='au'?'#5cc4f2':k==='ao'?'#ffb347':'')}</div>`;});
 $('#kFrz').innerHTML=KL(ICON_FREEZE,'Freeze');$('#kFrRnd').innerHTML=KL(ICON_DICE,'Random');$('#kFrByp').innerHTML=KL(ICON_BYP,'Bypass');$('#kFrSh').innerHTML=LL;
 
-function refreshAll(){MOM.refresh();refreshClock();selectSource(state.src);mod.refresh();updateLatency();}
+function refreshAll(){MOM.refresh();refreshSwitches();refreshClock();selectSource(state.src);mod.refresh();updateLatency();}
 audioHooks({sync:syncAll,restarted:()=>mod&&mod.restart()});
 
 /* ---------- computer keyboard: Z Shift, X Freeze, C Random, V Bypass, Space play ---------- */
@@ -32,6 +32,16 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(KEYMAP[k])MOM.keyUp(KEYMAP[k]);else if(k==='x')freezeUp();});
 
+/* ---------- printed lines: Spec / Loop to Direction / Thin, and Random glide to the Random key ---------- */
+function drawLines(){
+  const mod=$('#modFr'),r0=mod.getBoundingClientRect(),R=el=>{const r=el.getBoundingClientRect();return{l:r.left-r0.left,t:r.top-r0.top,r:r.right-r0.left,b:r.bottom-r0.top,cx:(r.left+r.right)/2-r0.left,cy:(r.top+r.bottom)/2-r0.top};};
+  const btn=R($('#fr-mode .lbtn')),dt=R($('#fr-dir .knob svg')),gl=R($('#fr-glide .knob svg')),rk=R($('#kFrRnd'));
+  const svg=`<svg class="plines" width="352" height="556" viewBox="0 0 352 556" aria-hidden="true">
+    <line x1="${btn.r+6}" y1="${btn.cy}" x2="${dt.l-2}" y2="${btn.cy}" class="pl-mode"/>
+    <line x1="${gl.cx}" y1="${gl.b+3}" x2="${gl.cx}" y2="${rk.t-6}" class="pl-rnd"/></svg>`;
+  mod.insertAdjacentHTML('beforeend',svg);
+}
+
 /* ---------- scale the module to the window ---------- */
 const MW=352,MH=556;
 function fitRack(){
@@ -45,4 +55,4 @@ window.addEventListener('resize',fitRack);
 function frame(now){runTweens(now);benchFrame(now);MOM.applyCV();requestAnimationFrame(frame);}
 
 loadState();setInterval(saveState,1500);window.addEventListener('pagehide',saveState);
-MOM.build();buildBench(()=>{tweens.clear();refreshAll();syncAll();});fitRack();refreshAll();updatePlay();requestAnimationFrame(frame);
+MOM.build();buildSwitches();drawLines();buildBench(()=>{tweens.clear();refreshAll();syncAll();});fitRack();refreshAll();updatePlay();requestAnimationFrame(frame);

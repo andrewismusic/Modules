@@ -2,16 +2,14 @@
 // A descriptor maps one parameter between the saved state (s[k]), a 0..1 knob position, and engine messages:
 //   get(s) -> position, put(s, x) stores it, eng(M, s, x) sends it (M.tx(key, value)), fmt(s) -> readout,
 //   def = default position, init = default value (used by Initialize), steps(s) = number of steps (0 = continuous),
-//   ui = never sent to the engine (Deviation, Glide), btn = a lit button with opts / cols, bip = bipolar ring.
-import { toPos, fromPos, pct, ms, sec } from './params.js';
+//   ui = never sent to the engine (Random glide), btn = a lit button with opts / cols, bip = bipolar ring.
+import { toPos, fromPos, ms, sec } from './params.js';
 
 /* Pitch quantize choices (the second layer of every Pitch encoder) and their ring colors */
 export const PQ=[['Free',null,'#ffffff'],['Chromatic',1,'#7cf29a'],['Octaves and fifths',[-24,-19,-12,-7,0,7,12,19,24],'#c49bff'],['Octaves',[-24,-12,0,12,24],'#7fe0ff']];
-/* clocked Random glide lengths in beats */
-export const GLIDES=[[0,'Instant'],[0.25,'1/16'],[0.5,'1/8'],[1,'1/4'],[2,'1/2'],[4,'1 bar'],[8,'2 bars'],[16,'4 bars'],[32,'8 bars'],[64,'16 bars']];
-/* the Glide range setting: short = up to 2 bars / 7 s, long = up to 16 bars / 33 s */
-export const glideList=long=>long?GLIDES:GLIDES.slice(0,GLIDES.findIndex(g=>g[0]===8)+1);
-export const glideMsP=long=>({min:0,max:long?33000:7000,pw:2.5});
+/* Random glide: clocked lengths in beats (up to 8 bars), otherwise up to 16 s */
+export const GLIDES=[[0,'Instant'],[0.25,'1/16'],[0.5,'1/8'],[1,'1/4'],[2,'1/2'],[4,'1 bar'],[8,'2 bars'],[16,'4 bars'],[32,'8 bars']];
+export const glideMsP={min:0,max:16000,pw:2.5};
 
 export function D_lin(k,l,p,f,d,e){return{k,l,init:d,bip:p.min<0&&p.max>0,get:s=>toPos(p,s[k]),eng:(M,s,x)=>M.tx(e,fromPos(p,x)),put:(s,x)=>{s[k]=fromPos(p,x);},fmt:s=>f(s[k]),def:toPos(p,d)};}
 /* pitch in semitones, ±R; its quantize setting (qk) decides the steps */
@@ -29,13 +27,11 @@ export function D_btn(k,l,opts,cols,e,d,after){return{k,l,btn:true,init:d,opts,c
 /* a stepped encoder from a list of choices (map gives the value sent for each) */
 export function D_step(k,l,list,e,init,map){return{k,l,init,steps:()=>list.length,get:s=>s[k]/(list.length-1),put:(s,x)=>{s[k]=Math.round(x*(list.length-1));},
   eng:(M,s,x)=>M.tx(e,map?map[Math.round(x*(list.length-1))]:Math.round(x*(list.length-1))),fmt:s=>list[s[k]],def:init/(list.length-1)};}
-/* Deviation: 10–100%, default 80% */
-export function D_amount(){return{k:'amount',l:'Random deviation',init:0.8,ui:true,get:s=>(s.amount-0.1)/0.9,put:(s,x)=>{s.amount=0.1+0.9*x;},eng:()=>{},fmt:s=>pct(s.amount),def:7/9};}
-/* Glide: note values when clocked (clocked()), otherwise ms; its range follows the Glide range setting (long()) */
-export function D_glide(clocked,long){const L=()=>glideList(long()),P=()=>glideMsP(long());
-  return{k:'glide',l:'Random glide',init:0,ui:true,steps:()=>clocked()?L().length:0,
-  get:s=>clocked()?Math.min(1,s.glideIdx/(L().length-1)):toPos(P(),Math.min(s.glideMs,P().max)),
-  put:(s,x)=>{if(clocked())s.glideIdx=Math.round(x*(L().length-1));else s.glideMs=fromPos(P(),x);},eng:()=>{},
-  fmt:s=>clocked()?L()[Math.min(s.glideIdx,L().length-1)][1]:(s.glideMs<10?'Instant':s.glideMs<1000?ms(s.glideMs):sec(s.glideMs/1000)),def:0};}
+/* Random glide: how long Random's changes take; note values when clocked (clocked()), otherwise ms */
+export function D_glide(clocked){const L=GLIDES,P=glideMsP;
+  return{k:'glide',l:'Random glide',init:0,ui:true,steps:()=>clocked()?L.length:0,
+  get:s=>clocked()?Math.min(1,s.glideIdx/(L.length-1)):toPos(P,Math.min(s.glideMs,P.max)),
+  put:(s,x)=>{if(clocked())s.glideIdx=Math.round(x*(L.length-1));else s.glideMs=fromPos(P,x);},eng:()=>{},
+  fmt:s=>clocked()?L[Math.min(s.glideIdx,L.length-1)][1]:(s.glideMs<10?'Instant':s.glideMs<1000?ms(s.glideMs):sec(s.glideMs/1000)),def:0};}
 /* how long a Random glide lasts in ms, at knob position pos */
-export function glideDuration(pos,clocked,long,bpm){const L=glideList(long);return clocked?L[Math.round(pos*(L.length-1))][0]*60/bpm*1000:fromPos(glideMsP(long),pos);}
+export function glideDuration(pos,clocked,bpm){return clocked?GLIDES[Math.round(pos*(GLIDES.length-1))][0]*60/bpm*1000:fromPos(glideMsP,pos);}
