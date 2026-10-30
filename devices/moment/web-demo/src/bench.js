@@ -46,6 +46,6 @@ export function benchFrame(now){
   const res=mod.tick(now);
   for(const[p,{v,trig}]of Object.entries(res)){const L=cvLetter(p);
     if(L)MOM.cvSet(L,v);else if(p==='Random'&&trig)MOM.randomize();
-    /* Freeze follows the Latch / Mom switch: in Mom it is a gate (frozen while the input is high) */
+    /* Freeze follows the Latch / Temp switch: in Temp it is a gate (frozen while the input is high) */
     else if(p==='Freeze'){if(FR().mom)freezeJack(v>0.3,false);else if(trig)freezeJack(true,true);}}
 }

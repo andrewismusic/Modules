@@ -13,7 +13,7 @@ export class Freezer{
     this.on=false;this.eng=0;this.inc=1/(0.01*sr);this.wet=1;
     this.mode=0;this.mm=0;this.mmInc=1/(0.03*sr);
     this.free=false;this.loopBeats=1;this.loopMs=250;this.fadeBeats=0;this.fadeMs=0;this.bpm=120;
-    this.spread=0;this.sTab=spreadTable(2049,20,sr,4096);this.pitch=0;this.tilt=0;this.thin=0;this.keep=1;this.blur=0;this.user=false;this.rolling=0;this.reverse=0;this.dir=1;this.rcnt=0;
+    this.spread=0;this.sTab=spreadTable(2049,20,sr,4096);this.pitch=0;this.tilt=0;this.thin=0;this.keep=1;this.blur=0;this.user=false;this.rolling=0;this.reverse=0;this.dir=1;
     {let P=1;while(P<sr*0.25)P<<=1;this.PM=P-1;this.pr=[new Float32Array(P),new Float32Array(P)];this.pw_=0;this.pph=[0,0.5];this.pmix=0;}
     const N=4096,nb=N/2+1;this.N=N;this.H=N/4;this.nb=nb;this.fft=new FFT(N);
     this.win=new Float32Array(N);for(let i=0;i<N;i++)this.win[i]=0.5-0.5*Math.cos(2*Math.PI*i/N);
@@ -26,22 +26,23 @@ export class Freezer{
     this.R2=[this.mkR(),this.mkR()];this.rc=0;this.rx=1;this.rxInc=1/(0.008*sr);this.warm=false;
     this.posMs=0;this.posBeats=0;this.off=0;this.offp=0;this.magDirty=false;
     this.L=this.calcL();this.Lp=this.L;this.lx=1;this.lxInc=1/(0.015*sr);this.pend=false;this.pendL=0;this.pendO=0;
-    /* Tone: a tilt EQ on the frozen sound (both modes) pivoting near 700 Hz, up to ±9 dB at each end, smoothed */
-    this.tone=0;this.tns=0;this.tlp=[0,0];this.tgL=1;this.tgH=1;this.tcnt=0;this.tc=1-Math.exp(-2*Math.PI*700/sr);
+    /* Repitch (Loop mode): Pitch changes the playback speed instead of time-stretching; rr = smoothed speed,
+       rp / rpp = whether the current / previous reading repitches (switching crossfades like a length change) */
+    this.repitch=0;this.rp=0;this.rpp=0;this.rr=1;this.rlg=0;this.rk=1-Math.exp(-1/(0.025*sr));this.rollEdge=false;
     this.oL=0;this.oR=0;this.sl=0;this.sr_=0;this.ll=0;this.lr=0;
     /* Dry/wet is smoothed (10 ms) so CV and Random glides that step it never click */
     this.ws=1;this.wk=1-Math.exp(-1/(0.01*sr));
   }
   /* per-pass direction state for one loop length: the pass now playing (reversed? faded in?) and the one after it */
-  mkDz(){return{pass:-1,rev:0,fin:0,npass:-1,nrev:0};}
+  mkDz(){return{pass:-1,rev:0,fin:0,npass:-1,nrev:0,nfin:0,lead:1,turn:0,st:0,lr:0,rp:0,nst:-1};}
   /* a new loop length or Position: the previous reading (Lp, offp) crossfades into the new one over 15 ms */
-  swap(L,O){if(O!==this.off)this.magDirty=true;this.Lp=this.L;this.offp=this.off;this.L=L;this.off=O;this.lx=0;for(const s of this.S){s.dz[1]=s.dz[0];s.dz[0]=this.mkDz();}}
+  swap(L,O,R){if(O!==this.off)this.magDirty=true;this.Lp=this.L;this.offp=this.off;this.rpp=this.rp;this.L=L;this.off=O;this.rp=R;this.lx=0;for(const s of this.S){s.dz[1]=s.dz[0];s.dz[0]=this.mkDz();}}
   mkR(){return{acc:[new Float32Array(this.N),new Float32Array(this.N)],hp:0};}
   Fof(L){return Math.max(2,Math.min(Math.round(0.012*this.sr),Math.floor(L/3)));}
   calcL(){const L=Math.round((this.free?this.loopMs/1000:this.loopBeats*60/this.bpm)*this.sr);return Math.max(16,Math.min(L,Math.floor((this.C-this.Fof(L)-4)/2)));}
   /* Position: how far back in the captured audio the freeze reads, in samples (up to 5 s; limited per capture to what it holds) */
   calcO(){const o=Math.round((this.free?this.posMs/1000:this.posBeats*60/this.bpm)*this.sr);return Math.max(0,Math.min(o,Math.round(5*this.sr)));}
-  updL(){const L=this.calcL(),O=this.calcO();if(this.lx>=1){if(L!==this.L||O!==this.off)this.swap(L,O);}else{this.pend=true;this.pendL=L;this.pendO=O;}}
+  updL(){const L=this.calcL(),O=this.calcO(),R=this.repitch?1:0;if(this.lx>=1){if(L!==this.L||O!==this.off||R!==this.rp)this.swap(L,O,R);}else{this.pend=true;this.pendL=L;this.pendO=O;this.pendR=R;}}
   fadeSec(){if(this.free)return Math.max(0.008,this.fadeMs/1000);return this.fadeBeats>0?this.fadeBeats*60/this.bpm:0.008;}
   set(on){this.user=on;this.update();}
   update(){
@@ -59,16 +60,22 @@ export class Freezer{
     if(st+C<=this.R)dst.set(rg.subarray(st,st+C));
     else{const a=this.R-st;dst.set(rg.subarray(st,this.R),0);dst.set(rg.subarray(0,C-a),a);}
   }
-  grab(fade){
+  /* hard: a Rolling handover. The new capture starts exactly where the playing one ends, so it takes over at once;
+     the playing pass's decision about the next pass (reverse, fade in) carries over to the new capture's first pass */
+  grab(fade,hard){
+    const od=this.S[this.newest].dz[0];
     let best=0,bs=9;
     for(let i=0;i<4;i++){const o=this.S[i];if(i===this.newest&&o.g>0)continue;const sc=o.g+(o.tg>0?2:0);if(sc<bs){bs=sc;best=i;}}
     const s=this.S[best];
     for(let c=0;c<2;c++)this.copyRing(s.lb[c],c);
     this.specMag(s);
     s.T=this.clock;s.dz=[this.mkDz(),this.mkDz()];
+    if(hard){const nd=s.dz[0],dec=od.npass===od.pass+1,seam=!this.rp||Math.abs(this.rr-1)<1e-6;
+      nd.npass=1;nd.nrev=dec?od.nrev:0;nd.nfin=dec?od.nfin:(seam?0:Math.round(0.012*this.sr));
+      for(const o of this.S){o.g=0;o.tg=0;}}
     const rate=1/Math.max(1,fade*this.sr);
     for(const o of this.S){o.tg=0;o.rate=rate;}
-    s.g=0;s.tg=1;this.newest=best;
+    s.g=hard?1:0;s.tg=1;this.newest=best;
     if(fade<=0.0081&&this.mm<1&&this.eng>0){const nr=1-this.rc;this.prefill(this.R2[nr],s);this.rc=nr;this.rx=0;}
   }
   /* a capture's spectrum: the average of four frames ending Position samples before the capture time */
@@ -143,21 +150,56 @@ export class Freezer{
   }
   /* one loop voice. Direction decides for each pass whether it plays backward; the choice for the next pass is made
      as the current one enters its last F samples, so turning Direction never flips a pass that is already playing.
-     Into a forward pass the loop joins seamlessly (the end crossfades into the audio just before the loop start);
-     into a reverse pass the current pass fades out and the reverse one fades in. w: 0 = current length, 1 = previous. */
+     Joins between passes never drop the level for long:
+     - where the playback position jumps, the end of the pass crossfades (equal power, F samples) with a lead-in that
+       runs up to exactly where the next pass begins: the audio just before a forward start, the audio approaching a
+       reverse start from below, and while Rolling the end of the old slice or the live input (the new capture
+       continues the audio);
+     - where playback turns around (forward into reverse, or reverse into forward, as in a ping-pong loop) the sound
+       dips for 2 ms on each side of the turn instead of making a sharp corner;
+     - Rolling with the loop playing forward into a new forward capture continues seamlessly with no crossfade.
+     A repitched loop away from normal speed fades out and in (F samples) at a Rolling handover instead.
+     Repitch: each pass plays the R × L samples ending where the loop's slice ends, at speed R (Hermite interpolation),
+     so the loop keeps its length; speed changes take effect at once and the slice start is fixed for the pass (a rise
+     is held back only as far as needed not to run out of captured audio before the pass ends).
+     w: 0 = current length, 1 = previous (crossfading after a change). */
   vs(s,L,c,w){
-    const F=this.Fof(L),T=s.T,g0=this.free?T-L:Math.floor(T/L)*L-L,base0=this.C-(T-g0),base=base0-Math.max(0,Math.min(w?this.offp:this.off,base0-F-1)),q=this.clock-g0,pass=Math.floor(q/L),p=q-pass*L,b=s.lb[c],D=s.dz[w];
+    const F=this.Fof(L),T=s.T,g0=this.free?T-L:Math.floor(T/L)*L-L,base0=this.C-(T-g0),oc=Math.max(0,Math.min(w?this.offp:this.off,base0-F-1)),base=base0-oc,q=this.clock-g0,pass=Math.floor(q/L),p=q-pass*L,b=s.lb[c],D=s.dz[w];
+    const rep=w?this.rpp:this.rp,R=rep?Math.min(this.rr,(base+L-2)/(L+F)):1,edge=w===0&&this.rollEdge&&s===this.S[this.newest],seam=!rep||Math.abs(R-1)<1e-6;
+    const fp=Math.max(2,Math.min(Math.round(0.002*this.sr),Math.floor(L/8)));
     if(c===0){
-      if(D.pass!==pass){if(D.npass===pass){D.rev=D.nrev;D.fin=D.nrev;}else{D.rev=0;D.fin=0;}D.pass=pass;}
-      if(p>=L-F&&D.npass!==pass+1){const h=Math.sin((pass+1)*12.9898+T*0.0007+L*0.013)*43758.5453,rnd=h-Math.floor(h);D.npass=pass+1;D.nrev=this.dir<0.999&&rnd>=this.dir?1:0;}
+      if(D.pass!==pass){const had=D.npass===pass;if(had){D.rev=D.nrev;D.fin=D.nfin;}else{D.rev=0;D.fin=0;}D.pass=pass;if(rep){D.st=had&&D.nst>=0?D.nst:base+L-R*L;D.lr=base+L-D.st;D.rp=p*R;}}
+      /* a speed rise mid-pass never runs past the captured audio: the rest of the pass goes only as fast as fits */
+      else if(rep){const left=D.rev?D.st+D.lr-2-D.rp:this.C-3-(D.st+D.rp);D.rp+=Math.min(R,Math.max(0,left)/Math.max(1,L-p));}
+      if(p>=L-F&&D.npass!==pass+1){const h=Math.sin((pass+1)*12.9898+T*0.0007+L*0.013)*43758.5453,rnd=h-Math.floor(h);D.npass=pass+1;D.nrev=this.dir<0.999&&rnd>=this.dir?1:0;D.nst=rep?base+L-R*L:-1;
+        /* how the join works: 1 = crossfade with a lead-in, 0 = nothing needed; turn = a turnaround dip */
+        if(edge&&!seam){D.lead=0;D.turn=0;D.nfin=F;}
+        else if(edge){D.lead=D.nrev||D.rev?1:0;D.turn=D.nrev;D.nfin=D.nrev?fp:0;}
+        else{D.lead=D.rev===D.nrev?1:0;D.turn=D.lead?D.nrev:1;D.nfin=D.turn?fp:0;}}
     }
-    const fd=Math.min(F,L/4),nrev=D.npass===pass+1&&D.nrev;
-    let v=D.rev?b[base+L-1-p]:b[base+p];
-    if(D.fin)v*=Math.min(1,(p+1)/fd);
-    if(nrev)v*=Math.min(1,(L-p)/fd);
-    else if(p>=L-F){const j=p-(L-F),x=j/F*1.5707963;v=v*Math.cos(x)+b[base-F+j]*Math.sin(x);}
+    const nx=D.npass===pass+1;
+    let v=rep?this.hi(b,D.rev?D.st+D.lr-1-D.rp:D.st+D.rp):D.rev?b[base+L-1-p]:b[base+p];
+    if(D.fin)v*=this.rc_(Math.min(1,(p+1)/D.fin));
+    if(nx&&p>=L-F){
+      const j=p-(L-F);
+      if(edge&&!seam)v*=Math.min(1,(L-p)/F);
+      else if(D.lead){
+        let lead;
+        if(edge)lead=D.nrev?this.ring[c][(this.w-1-oc)&this.mask]:b[base+L-F+j];
+        else if(!D.nrev)lead=rep?this.hi(b,(D.nst>=0?D.nst:base+L-R*L)-(F-j)*R):b[base-F+j];
+        else lead=rep?this.hi(b,base+L-1-(F-j)*R):b[base+L-1-(F-j)];
+        /* equal-power gains whose slopes are flat at both ends (no kink as the crossfade starts or ends) */
+        const x=this.rc_(j/F)*1.5707963;v=v*Math.cos(x)+lead*Math.sin(x);
+      }
+      if(D.turn)v*=this.rc_(Math.min(1,(L-p)/fp));
+    }
     return v;
   }
+  /* raised-cosine ramp 0..1 */
+  rc_(x){return 0.5-0.5*Math.cos(Math.PI*x);}
+  /* 4-point Hermite interpolation of b at fractional index x (kept inside the buffer) */
+  hi(b,x){const n=b.length;x=Math.max(1,Math.min(n-3,x));const i=Math.floor(x),f=x-i,xm=b[i-1],x0=b[i],x1=b[i+1],x2=b[i+2];
+    const c=(x1-xm)*0.5,v=x0-x1,w=c+v,a=w+v+(x2-x0)*0.5,bn=w+a;return((a*f-bn)*f+c)*f+x0;}
   loopTick(){
     let sl=0,sr=0,gq=0;const blend=this.lx<1;
     const x=this.lx*1.5707963,cn=Math.cos(x),sn=Math.sin(x);
@@ -170,7 +212,7 @@ export class Freezer{
     if(gq>0){const n=1/Math.sqrt(gq);sl*=n;sr*=n;}
     /* loop pitch: two-tap delay-line shifter, faded in only when Pitch is away from zero */
     const P=this.PM,w=this.pw_;this.pr[0][w]=sl;this.pr[1][w]=sr;this.pw_=(w+1)&P;
-    this.pmix+=((this.pitch!==0?1:0)-this.pmix)*0.002;
+    this.pmix+=((this.pitch!==0&&!this.repitch?1:0)-this.pmix)*0.002;
     if(this.pmix>1e-4){
       const ratio=Math.pow(2,this.pitch/12),W=0.06*this.sr;let p=this.pph[0]+(1-ratio)/W;p-=Math.floor(p);this.pph[0]=p;
       let q=p+0.5;if(q>=1)q-=1;const s1=Math.sin(Math.PI*p),g1=s1*s1;
@@ -186,14 +228,19 @@ export class Freezer{
     if(this.on){if(this.eng<1)this.eng=Math.min(1,this.eng+this.inc);}
     else if(this.eng>0)this.eng=Math.max(0,this.eng-this.inc);
     for(const s of this.S){if(s.g!==s.tg){if(s.g<s.tg)s.g=Math.min(s.tg,s.g+s.rate);else s.g=Math.max(s.tg,s.g-s.rate);}}
-    if(this.lx<1){this.lx+=this.lxInc;if(this.lx>=1){this.lx=1;if(this.pend){this.pend=false;if(this.pendL!==this.L||this.pendO!==this.off)this.swap(this.pendL,this.pendO);}}}
+    if(this.lx<1){this.lx+=this.lxInc;if(this.lx>=1){this.lx=1;if(this.pend){this.pend=false;if(this.pendL!==this.L||this.pendO!==this.off||this.pendR!==this.rp)this.swap(this.pendL,this.pendO,this.pendR);}}}
     if(this.ws!==this.wet){this.ws+=(this.wet-this.ws)*this.wk;if(Math.abs(this.ws-this.wet)<1e-5)this.ws=this.wet;}
     const mt=this.mode?1:0;if(this.mm!==mt)this.mm=mt>this.mm?Math.min(1,this.mm+this.mmInc):Math.max(0,this.mm-this.mmInc);
     if(this.eng<=0){this.oL=l;this.oR=r;return;}
-    /* Rolling: while frozen, grab fresh audio at every loop boundary */
+    /* Repitch speed glides in octaves (about 25 ms), so pitch steps and jumps sweep rather than snap */
+    {const t=this.repitch?this.pitch/12:0;if(this.rlg!==t){this.rlg+=(t-this.rlg)*this.rk;if(Math.abs(this.rlg-t)<1e-6)this.rlg=t;this.rr=Math.pow(2,this.rlg);}}
+    /* Rolling: while frozen, grab fresh audio at every loop boundary of the newest capture. With no capture Fade set,
+       the new capture takes over at once (it continues the same audio); with a Fade the two blend */
+    this.rollEdge=false;
     if(this.rolling&&this.user){
-      const L=this.L,due=this.free?(++this.rcnt>=L):(this.clock%L===0);
-      if(due){this.rcnt=0;this.grab(Math.max(0.008,Math.min(this.fadeSec(),L/this.sr*0.5)));}
+      const L=this.L,T=this.S[this.newest].T,due=this.free?(this.clock>T&&(this.clock-T)%L===0):(this.clock%L===0);
+      const fs=this.fadeSec(),hard=fs<=0.0081&&this.lx>=1;this.rollEdge=hard;
+      if(due){if(hard)this.grab(0,true);else this.grab(Math.max(0.008,Math.min(fs,L/this.sr*0.5)));}
     }
     let fl=0,fr=0;
     if(this.mm<1){if(!this.warm){this.prefill(this.R2[this.rc],null);this.rx=1;this.warm=true;}this.specTick();fl=this.sl;fr=this.sr_;}
@@ -203,11 +250,6 @@ export class Freezer{
       if(this.mm>=1){fl=this.ll;fr=this.lr;}
       else{const x=this.mm*1.5707963,c=Math.cos(x),s=Math.sin(x);fl=fl*c+this.ll*s;fr=fr*c+this.lr*s;}
     }
-    /* Tone: the low band (one-pole) and the rest are weighted against each other; the filter always runs so moving
-       Tone away from 0 never starts from a stale state */
-    {const c=this.tc,a=this.tlp;a[0]+=(fl-a[0])*c;a[1]+=(fr-a[1])*c;
-      if(this.tns!==this.tone){this.tns+=(this.tone-this.tns)*this.wk;if(Math.abs(this.tns-this.tone)<1e-5)this.tns=this.tone;}
-      if(this.tns!==0){if((this.tcnt++&15)===0){const g=Math.pow(2,1.5*this.tns);this.tgH=g;this.tgL=1/g;}fl=a[0]*this.tgL+(fl-a[0])*this.tgH;fr=a[1]*this.tgL+(fr-a[1])*this.tgH;}}
     const bb=this.eng*this.ws*1.5707963,ca=Math.cos(bb),sb=Math.sin(bb);
     this.oL=l*ca+fl*sb;this.oR=r*ca+fr*sb;
   }

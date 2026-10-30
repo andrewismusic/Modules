@@ -149,13 +149,42 @@ describe('Moment Position', () => {
   });
 });
 
-describe('Moment Tone', () => {
-  it('tilts the frozen sound: clockwise brighter, counter-clockwise darker', () => {
-    const lv = t => { const p = moment({ mode: 1, free: true, loopMs: 300, tone: t });
-      run(p, 300, i => { const v = 0.2 * (Math.sin(2 * Math.PI * 110 * i / SR) + Math.sin(2 * Math.PI * 5000 * i / SR)); return [v, v]; });
-      send(p, { type: 'freeze', v: true }); const { L } = run(p, 300, () => [0, 0]); return tone(L, 5000, 100 * 128) / tone(L, 110, 100 * 128); };
-    const flat = lv(0), bright = lv(1), dark = lv(-1);
-    expect(bright / flat).toBeGreaterThan(4); expect(flat / dark).toBeGreaterThan(4);
+describe('Moment Rolling joins', () => {
+  it('Rolling, Direction 100%: the loop is the input delayed by a fixed time, to within rounding (no fades at the handovers)', () => {
+    for (const o of [{ free: false, loopBeats: 0.5 }, { free: true, loopMs: 300 }]) {
+      const p = moment({ mode: 1, rolling: 1, ...o }), n = noise(21), inL = [];
+      run(p, 900, i => { const v = n(); inL[i] = v; return [v, v]; }); send(p, { type: 'freeze', v: true });
+      const { L } = run(p, 900, i => { const v = n(); inL[i] = v; return [v, v]; });
+      const t0 = 900 * 128, a = 300 * 128; let best = null;
+      for (let d = 1; d < 40000 && best === null; d++) { let ok = true; for (let k = 0; k < 64; k++) if (Math.abs(L[a + k] - inL[t0 + a + k - d]) > 1e-6) { ok = false; break; } if (ok) best = d; }
+      expect(best).not.toBeNull();
+      for (let i = a; i < L.length; i++) if (Math.abs(L[i] - inL[t0 + i - best]) > 1e-6) throw new Error(`sample ${i} differs (delay ${best})`); // within rounding of the dry/wet mixer
+    }
+  });
+  it('Rolling with Direction 50% on noise: joins never drop the level by more than 6 dB (10 ms windows)', () => {
+    const p = moment({ mode: 1, rolling: 1, free: false, loopBeats: 0.5, dir: 0.5 }), n = noise(22);
+    run(p, 900, () => { const v = n(); return [v, v]; }); send(p, { type: 'freeze', v: true });
+    const { L } = run(p, 1200, () => { const v = n(); return [v, v]; });
+    const W = 480, lv = []; for (let i = 100 * 128; i + W < L.length; i += 120) lv.push(rms(L, i, i + W));
+    const med = [...lv].sort((x, y) => x - y)[lv.length >> 1];
+    expect(20 * Math.log10(Math.min(...lv) / med)).toBeGreaterThan(-6);
   });
 });
 
+describe('Moment Repitch', () => {
+  it('Loop mode, Repitch +12: an octave up by playing faster, and the loop keeps its length', () => {
+    const p = moment({ mode: 1, free: false, loopBeats: 0.5, repitch: 1, pitch: 12 });
+    run(p, 900, sine(330)); send(p, { type: 'freeze', v: true });
+    const { L } = run(p, 600, () => [0, 0]);
+    expect(tone(L, 660, 200 * 128)).toBeGreaterThan(10 * tone(L, 330, 200 * 128));
+    let err = 0; for (let i = 200 * 128; i < 200 * 128 + 12000; i++) err = Math.max(err, Math.abs(L[i] - L[i + 12000]));
+    expect(err).toBeLessThan(1e-3); // a wrong length would differ by about the signal level
+  });
+  it('Stretch (the default) keeps the same pitch through the time-stretcher, not by speed', () => {
+    const p = moment({ mode: 1, free: false, loopBeats: 0.5, pitch: 12 });
+    run(p, 900, sine(330)); send(p, { type: 'freeze', v: true });
+    const { L } = run(p, 600, () => [0, 0]);
+    expect(tone(L, 660, 200 * 128)).toBeGreaterThan(10 * tone(L, 330, 200 * 128));
+    expect(p.e.f.rp).toBe(0);
+  });
+});

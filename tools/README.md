@@ -9,9 +9,8 @@ Run all checks with `npm test`. They live in `tools/checks/`:
 - `relay-control.test.js`: Relay's key grammar and randomize rules.
 - `moment-engine.test.js`: the bundled Moment worklet runs every feature, recovers, adds no delay (bit-exact until
   something is frozen), holds the sound when frozen, locks clocked loops to the note length, plays Direction 0
-  backwards, only re-captures in Rolling while frozen, reads earlier audio with Position, and tilts with Tone.
+  backwards, only re-captures in Rolling while frozen (seamlessly), reads earlier audio with Position, and repitches.
 - `moment-clicks.test.js`: the click detector on Moment's encoder sweeps, CV-style steps and key actions while frozen.
-- `panel-control.test.js`: the Moment / Prism key grammar, Random's ranges around the hand-set value, and Moment's
-  Freeze key.
+- `panel-control.test.js`: the Moment / Prism key grammar, Random's rule, and Moment's Freeze key.
 - `modulation.test.js`: the bench's Euclidean rhythms, rhythm triggers, LFO and clocked S&H.
 `worklet-build.js` bundles a device's worklet entry into one string (and is the Vite plugin the demos use).

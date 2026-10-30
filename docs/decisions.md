@@ -22,8 +22,8 @@ Do not re-propose these without new information. Add to this list whenever somet
 - **Smear shimmer.** It sounded bad; Blur was kept. Thin got its own shimmer, with an interval, instead.
 - **Stereo spread controls.** Removed from the panels.
 - **Breathing LEDs to show Random membership.** Hard to read values. Replaced by showing membership only while
-  Random is held for 0.25 s. (Revived by the designer on 2026-10-28 in a gentler form: a slow breathe of the lit LEDs
-  only, between their color and amber.)
+  Random is held for 0.25 s. Tried again on 2026-10-28 as a slow breathe of the lit LEDs between their color and
+  amber; removed again on 2026-10-30.
 - **Amber "anchor" LED on encoders.** Dropped.
 - **Momentary Relay bypass on hold.** Removed; Bypass is a toggle.
 - **Moment Swell / Sustain shapes.** Removed.
@@ -47,3 +47,11 @@ Do not re-propose these without new information. Add to this list whenever somet
   - CV 4;
   - Keep (Thin keeps the loudest partials) as a panel control: it would have done nothing while Thin was off. Width
     and Blur were also considered for second layers and not added.
+- **Moment review round 2 (2026-10-30).** Removed:
+  - Thin and Tone (not compelling enough); Direction is now a Loop-only encoder;
+  - random ranges altogether (relative ranges, Random + turn, the unipolar / bipolar setting, Random + Bypass = full
+    ranges) and with them Moment's settings page: Random is on or off per parameter, always over the full throw;
+  - Shift + Freeze as the fresh capture (it blocked the encoders' main layers while held): now Bypass + Freeze;
+  - the Recapture and Setup legends, and the doubled Spec · Loop label;
+  - the names Mom and Man (now Temp and Hold).
+

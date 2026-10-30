@@ -1,5 +1,5 @@
 // Moment's controls (devices/moment/SPEC.md): descriptors, panel layout and Random defaults.
-// Moved from the v30 prototype's MOM config and reworked in the 2026-10 review.
+// Moved from the v30 prototype's MOM config and reworked in the 2026-10 reviews.
 import { toPos, fromPos, pct, ms } from '../../../shared/control/params.js';
 import { D_lin, D_pitch, D_steps, D_btn, D_glide } from '../../../shared/control/panel-descs.js';
 
@@ -10,16 +10,15 @@ export const FADES=[[0,'Instant'],[0.25,'1/16'],[0.5,'1/8'],[1,'1/4'],[2,'1/2'],
 export const POS_MAX_MS=5000;
 export const posSteps=bpm=>Math.floor(POS_MAX_MS/1000/(60/bpm/4))+1;
 const fmsP={min:5,max:3000,log:1},fadeMsP={min:0,max:4000,pw:2},posMsP={min:0,max:POS_MAX_MS};
-/* the mode colors: Spectral violet, Loop teal (lit button, labels, and the mode-following encoder's ring) */
+/* the mode colors: Spectral violet, Loop teal (lit button; Loop-only controls are printed in teal) */
 export const SPEC_COL='#b48cff',LOOP_COL='#3fe3c2';
 /* Random membership by default: Dry/wet, Length, Direction */
-export const RND_DEF={wet:1,len:1,fade:0,pitch:0,pq:0,dir:1,thin:0,tone:0,pos:0,mode:0,glide:0,latch:0};
-export const defaultMoment=()=>({held:false,latched:false,byp:0,cvmap:{},ra:{},pol:{},home:{},layer:{},rnd:{...RND_DEF},glideIdx:0,glideMs:0,wet:1,fadeIdx:0,fadeMs:0,
-  lenIdx:8,ms:250,pitch:0,pq:1,dir:1,thin:0,tone:0,posMs:0,posIdx:0,mode:0,mom:0,rolling:0});
-/* top row: Spec / Loop, Direction / Thin (follows the mode), Tone, Pitch · quant;
+export const RND_DEF={wet:1,len:1,fade:0,pitch:0,pq:0,dir:1,pos:0,mode:0,glide:0,latch:0};
+export const defaultMoment=()=>({held:false,latched:false,byp:0,cvmap:{},layer:{},rnd:{...RND_DEF},glideIdx:0,glideMs:0,wet:1,fadeIdx:0,fadeMs:0,
+  lenIdx:8,ms:250,pitch:0,pq:1,dir:1,posMs:0,posIdx:0,mode:0,mom:0,rolling:0,repitch:0});
+/* top row: Spec / Loop, Direction, (the Stretch / Repitch switch), Pitch · quant;
    bottom row: Length · fade, Position, Random glide, Dry/wet */
-export const followMode=s=>s.mode===1?'dir':'thin';
-export const LAYOUT=[['mode'],['dir','thin',followMode],['tone'],['pitch','pq'],['len','fade'],['pos'],['glide'],['wet']];
+export const LAYOUT=[['mode'],['dir'],['pitch','pq'],['len','fade'],['pos'],['glide'],['wet']];
 
 /* h: clocked() (Clock jack patched), bpm() */
 export function momentDescs(h){
@@ -36,12 +35,10 @@ export function momentDescs(h){
       eng:(M,s,x)=>{if(c())M.tx('posBeats',Math.round(x*(N()-1))*0.25);else M.tx('posMs',fromPos(posMsP,x));},
       fmt:s=>c()?(s.posIdx?`−${Math.min(s.posIdx,N()-1)}/16`:'Now'):(s.posMs<5?'Now':`−${(s.posMs/1000).toFixed(2)} s`),def:0},
     D_pitch('pitch','Pitch','pitch','pq'),D_steps('pq','Pitch quant','pitch'),
-    Object.assign(D_lin('dir','Direction',{min:0,max:1},v=>v>0.98?'Forward':v<0.02?'Reverse':Math.round(v*100)+'% forward',1,'dir'),{ring:()=>LOOP_COL}),
-    Object.assign(D_lin('thin','Thin',{min:0,max:1},v=>v<0.01?'Off':pct(v),0,'thin'),{ring:()=>SPEC_COL}),
-    D_lin('tone','Tone',{min:-1,max:1},v=>Math.abs(v)<0.03?'Flat':v>0?'Brighter '+Math.round(v*100):'Darker '+Math.round(-v*100),0,'tone'),
+    D_lin('dir','Direction',{min:0,max:1},v=>v>0.98?'Forward':v<0.02?'Reverse':Math.round(v*100)+'% forward',1,'dir'),
     D_btn('mode','Freeze type',['Spec','Loop'],[SPEC_COL,LOOP_COL],'mode',0),
     D_glide(c)];
 }
 /* the engine messages for the clock-dependent settings and the switches, sent before the descriptors on every sync */
 export function momentPreSync(M,clocked,bpm){const s=M.s(),N=posSteps(bpm);M.tx('free',!clocked);M.tx('bpm',bpm);M.tx('fadeBeats',FADES[s.fadeIdx][0]);M.tx('fadeMs',s.fadeMs);
-  M.tx('loopBeats',LOOPS[s.lenIdx][0]);M.tx('loopMs',s.ms);M.tx('posBeats',Math.min(s.posIdx,N-1)*0.25);M.tx('posMs',s.posMs);M.tx('rolling',s.rolling);}
+  M.tx('loopBeats',LOOPS[s.lenIdx][0]);M.tx('loopMs',s.ms);M.tx('posBeats',Math.min(s.posIdx,N-1)*0.25);M.tx('posMs',s.posMs);M.tx('rolling',s.rolling);M.tx('repitch',s.repitch);}

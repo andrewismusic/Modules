@@ -20,46 +20,32 @@ jack row sits a little lower than the first for finger room.
 Bypass on any module: its Bypass key light turns red, all other lights dim; controls stay adjustable.
 
 ## Shared encoder / key scheme (Moment and Prism)
-Reworked with the designer on 2026-10-28 to cut the number of combinations; Prism inherits it when it is built.
+Simplified with the designer on 2026-10-28 and 2026-10-30 to cut the number of combinations; Prism inherits it when it
+is built.
 - Encoder tap = latch its second parameter (ring turns pink). Holding Shift shows every encoder's second parameter
   (and lit buttons / key-buttons switch to their shift function) while held; releasing Shift returns each encoder to
   whatever layer it was latched on. Press and hold an encoder (0.35 s) then turn = adjust the other layer momentarily.
   Bypass + tap = reset the shown parameter to default. At minimum a ring keeps one LED lit.
-- An encoder can instead follow a mode (Moment's Direction / Thin follows Spec / Loop): it shows and turns the
-  parameter that applies in the current mode, has no second layer, and its labels are printed in the mode colors.
 - Pitch encoders have "quant" as their second layer: Free (white), Chromatic (green), Octaves and fifths (violet),
   Octaves (ice).
 - Lit buttons: tap = next state (Shift + tap = their shift function, if they have one); Random + tap = membership;
-  Bypass + tap = default.
+  Bypass + tap = default. A lit button's states are named only once, by its color legend.
 - Key-buttons (Prism Order): tap = next order; Shift + tap = resolution; Random + tap = membership (amber key light
   while Random is held); Bypass + tap = default.
 - Keys: Shift (leftmost) is a held modifier. Random and Bypass act on release.
-  - Random + Bypass = every random range back to full (all rings blink amber).
-  - Shift + Bypass = settings page, as Bypass goes down (the same as Relay's menu).
-  - There is no Initialize, no shuffling of assignments and no reset of the assignment list (all removed 2026-10-28).
-- Random (every included parameter changes on each press):
-  - Membership: Random + tap includes or excludes the shown parameter (second-layer parameters too). Included
-    parameters' lit LEDs breathe slowly between their color and amber (assignment mode, Random held and the settings
-    page take over while they are on).
-  - Ranges are relative to the hand-set value: the last value set by hand. Random moves a parameter within its range
-    around that value, so repeated presses scatter around your sound instead of drifting away. Turning an encoder after
-    a Random press starts from the value it is at and makes that the new hand-set value (the range moves with it).
-  - Random held (0.25 s): the rings of included parameters show the hand-set value's LED in the parameter's color and
-    its range in amber; the rest dim. Otherwise rings show the current (randomized) value.
-  - Random + turn sets the shown parameter's range. Bipolar ranges grow on both sides of the hand-set value; unipolar
-    ranges are signed: clockwise extends the range above the value, counter-clockwise below, and turning past the
-    minimum jumps to the other side. A range is never smaller than one LED (1/14 of the throw) or one step, so at
-    least one amber LED always shows beside the value (two when bipolar). Ranges start full (bipolar, the whole
-    throw) and are cut off at the ends of the throw.
-  - Stepped settings pick one of the steps inside the range; two-state buttons always pick from both states.
+  - Random + Bypass has no function for now: neither key acts.
+  - A device with a settings page opens it with Shift + Bypass, as Bypass goes down (the same as Relay's menu); Bypass
+    keeps and exits, Shift cancels. Moment has no settings page, so on Moment Shift does not change Bypass.
+  - There is no Initialize, no shuffling of assignments and no reset of the assignment list.
+- Random (every included parameter changes on each press, to any value in its throw):
+  - Membership: Random + tap includes or excludes the shown parameter (second-layer parameters too). While Random is
+    held (0.25 s) the rings of included parameters light fully amber and the rest dim; a quick tap just randomizes.
+  - Stepped settings and buttons pick one of their steps.
   - Random glide (its own encoder, default 0, printed in amber with a line to the Random key) glides continuous
     changes: note values when clocked (up to 8 bars), otherwise up to 16 s. Stepped settings and buttons change at once.
-  - (Removed 2026-10-28: the Deviation encoder, its Window / Distinct setting, absolute upper and lower range limits,
-    and the Glide range setting.)
-- Settings page (Shift + Bypass; Bypass = keep and exit, Shift = cancel, both as they go down): each encoder shows its
-  shown parameter's range type around noon: the noon LED in the parameter's color and amber clockwise of it
-  (unipolar) or on both sides (bipolar). Press or turn an encoder to switch it. Second layers show when latched (tap
-  the encoder before opening the page). Per parameter, saved.
+  - (Removed: the Deviation encoder and its Window / Distinct setting, random ranges in every form (absolute limits,
+    then ranges around the hand-set value with a unipolar / bipolar setting), the Glide range setting, and breathing
+    LEDs for membership.)
 - Modifier keys are released automatically if the window loses focus (no stuck Shift / Random / Bypass).
 - CV jacks (CV 1–4 green / periwinkle / coral / yellow; Moment has CV 1–3): patching a jack opens assignment mode for
   5 s; unassigned controls breathe in the jack color. Tap an encoder, button or key to assign/unassign. Tap Bypass =
@@ -73,6 +59,6 @@ Reworked with the designer on 2026-10-28 to cut the number of combinations; Pris
   and neither does Shift.
 - Exception (confirmed 2026-10-28): Moment's Freeze key acts on press, because it is played.
 - Shift + Bypass opens Relay's menu as Bypass goes down: the one key action on press. The release that follows does
-  nothing. Moment and Prism open their settings page the same way (decided 2026-10-28; it used to need a 3 s hold).
+  nothing. A Moment / Prism settings page opens the same way (Prism only, for now; it used to need a 3 s hold).
 - The enter/back grammar (Bypass = enter, Shift = back) is the same in Relay's screens and in Moment/Prism settings.
 - Relay has no Random-membership or CV-assignment gestures; its CV is configured in the menu.

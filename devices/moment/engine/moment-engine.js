@@ -12,7 +12,7 @@ export class MomentEngine{
   msg(m){
     switch(m.type){
       case'fz':if(m.k==='byp'){this.byp=m.v?1:0;break;}if(typeof this.f[m.k]!=='number'&&typeof this.f[m.k]!=='boolean')break;
-        this.f[m.k]=m.v;if(m.k==='free'||m.k==='loopBeats'||m.k==='loopMs'||m.k==='posMs'||m.k==='posBeats'||m.k==='bpm')this.f.updL();break;
+        this.f[m.k]=m.v;if(m.k==='free'||m.k==='loopBeats'||m.k==='loopMs'||m.k==='posMs'||m.k==='posBeats'||m.k==='repitch'||m.k==='bpm')this.f.updL();break;
       case'freeze':this.f.set(!!m.v);break;
       case'reseed':this.f.reseed();break;
       case'bpm':this.f.bpm=m.v;this.f.updL();break;

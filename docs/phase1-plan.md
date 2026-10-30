@@ -28,6 +28,12 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
   switches (CV 4 removed); Rolling is a property of the freeze. New layout with Direction / Thin following the mode,
   Tone (both modes), Position (live), Random glide above the Random key. Full list in `docs/decisions.md`.
 
+## Decisions taken with the designer (2026-10-30)
+- **Moment review round 2.** Remove Thin and Tone, random ranges (and the settings page that held their type) and the
+  membership breathing. Random is on or off per parameter, over the full throw. Bypass + Freeze = fresh capture.
+  A Stretch / Repitch switch beside Pitch (Repitch keeps the loop length). Switch names Latch / Temp and Hold / Roll.
+  Spec · Loop named once. Mitigate the Rolling artifacts.
+
 ## Build setup
 - One root `package.json`. Vite with `vite-plugin-singlefile` builds each `devices/<device>/web-demo/` into one HTML
   file. Vitest runs the behaviour checks in `tools/`.
@@ -66,7 +72,7 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
    designer's listening review.**
 6. ~~Moment demo.~~ Done: `devices/moment/web-demo/moment.html`, with the shared panel module Prism will reuse.
    **Waiting on the designer's review.**
-   ~~Moment review round 1 (2026-10-28).~~ Done. **Waiting on the designer's review.**
+   ~~Moment review rounds 1 (2026-10-28) and 2 (2026-10-30).~~ Done. **Waiting on the designer's review.**
 7. Prism (revisit its layout and settings against the new shared grammar first; see `devices/prism/SPEC.md`).
 8. Relay: 100 save slots (designer, 2026-10-25).
 
@@ -95,6 +101,13 @@ Working plan for Phase 1 (see `HANDOFF.md` §3). Update it as steps land.
   while the key was held; it now does nothing.
 - **Open question for the designer.** Freeze acts on press (prototype behaviour; needed for Shift + Freeze momentary),
   while the design language says every key acts on release.
+- **Moment review round 2 (2026-10-30).** Thin, Tone, random ranges, the settings page and breathing removed; Bypass +
+  Freeze = fresh capture; Stretch / Repitch switch; Temp / Hold names. Rolling rebuilt after measuring it on a steady
+  220 Hz tone: every handover dipped 2.7 dB (the tremolo), and with Direction 50% the 12 ms fades dipped 14.5 dB (the
+  dropouts). Now a Rolling handover hands straight to the new capture (Direction 100%: the input delayed by exactly
+  one loop, to within rounding); jumps crossfade at equal power with audio leading to the next start; turnarounds dip
+  2 ms. Crossfade gains are now flat at both ends (their kink measured up to 29× against a low pitch). With
+  Direction 50% on noise, no 10 ms window drops more than 6 dB. Repitch: pitch sweeps 1.5–2.8×.
 - **Moment review round 1 (2026-10-28).** Built as decided. Rolling no longer freezes by itself (engine change in
   `shared/dsp/freezer.js`). Position re-reads the capture: loops crossfade over 15 ms to each new place (a frame-rate
   sweep measured 1.8×, still 1.4×), the spectral freeze re-measures at the next frame (1.0×). Tone is a tilt EQ after

@@ -18,12 +18,13 @@ const pass = (move, still) => move < Math.max(LIMIT, still * 1.5);
 /* a sweep 0 -> 1 -> 0 over 60 UI frames, then a jump (as a stepped LFO or S&H would send) */
 const sweep = (k, map) => b => { if (b % FRAME) return null; const t = b / FRAME; const x = t < 30 ? t / 30 : t < 60 ? 2 - t / 30 : t < 80 ? 0.9 : 0.1; return { type: 'fz', k, v: map(x) }; };
 
-const BASE = { loop: { mode: 1, free: true, loopMs: 300 }, spec: { mode: 0, free: true, loopMs: 300 }, clocked: { mode: 1, free: false, loopBeats: 1 } };
+const BASE = { loop: { mode: 1, free: true, loopMs: 300 }, spec: { mode: 0, free: true, loopMs: 300 }, clocked: { mode: 1, free: false, loopBeats: 1 }, repitch: { mode: 1, free: true, loopMs: 300, repitch: 1, pitch: 5 },
+  rolling: { mode: 1, free: false, loopBeats: 0.5, rolling: 1 } };
 const MOVES = [
   ['loop', 'dry/wet', sweep('wet', x => x)], ['spec', 'dry/wet', sweep('wet', x => x)],
   ['loop', 'length', sweep('loopMs', x => 40 + x * 900)],
   ['loop', 'pitch', sweep('pitch', x => Math.round(x * 48 - 24))], ['spec', 'pitch', sweep('pitch', x => Math.round(x * 48 - 24))],
-  ['loop', 'direction', sweep('dir', x => x)], ['spec', 'thin', sweep('thin', x => x)],
+  ['loop', 'direction', sweep('dir', x => x)],
   ['loop', 'mode switch', b => b % 120 === 60 ? { type: 'fz', k: 'mode', v: (b / 120 | 0) % 2 ? 1 : 0 } : null],
   ['spec', 'mode switch', b => b % 120 === 60 ? { type: 'fz', k: 'mode', v: (b / 120 | 0) % 2 ? 0 : 1 } : null],
   ['loop', 'freeze off and on', b => b % 150 === 50 ? { type: 'freeze', v: false } : b % 150 === 100 ? { type: 'freeze', v: true } : null],
@@ -31,7 +32,10 @@ const MOVES = [
   ['loop', 'fresh capture', b => b % 150 === 75 ? { type: 'reseed' } : null], ['spec', 'fresh capture', b => b % 150 === 75 ? { type: 'reseed' } : null],
   ['loop', 'bypass', b => b % 150 === 75 ? { type: 'fz', k: 'byp', v: (b / 150 | 0) % 2 ? 0 : 1 } : null],
   ['loop', 'rolling on and off while frozen', b => b === 30 ? { type: 'fz', k: 'rolling', v: 1 } : b === 400 ? { type: 'fz', k: 'rolling', v: 0 } : null],
-  ['loop', 'tone', sweep('tone', x => x * 2 - 1)], ['spec', 'tone', sweep('tone', x => x * 2 - 1)],
+  ['repitch', 'pitch (repitched)', sweep('pitch', x => Math.round(x * 48 - 24))],
+  ['repitch', 'free pitch glide (repitched)', sweep('pitch', x => x * 24 - 12)],
+  ['loop', 'stretch / repitch switching', b => b % 100 === 50 ? { type: 'fz', k: 'repitch', v: (b / 100 | 0) % 2 ? 0 : 1 } : null],
+  ['rolling', 'rolling with direction sweep', sweep('dir', x => x)],
   ['loop', 'position', sweep('posMs', x => x * 5000)], ['spec', 'position', sweep('posMs', x => x * 5000)],
   ['clocked', 'position steps', b => b % 24 === 0 ? { type: 'fz', k: 'posBeats', v: (b / 24 % 9) * 0.25 } : null],
   ['loop', 'free to clocked', b => b === 30 ? { type: 'fz', k: 'free', v: false } : null],
